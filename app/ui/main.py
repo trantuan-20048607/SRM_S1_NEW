@@ -78,6 +78,10 @@ class Window(object):
                 self.screen.blit(ft.render(f"BAT: {msg.bat}", True, (10, 255, 10)), (800, 80))
             if self.speed[0] or self.speed[1]:
                 self.screen.blit(ft.render("移动", True, (160, 20, 10)), (100, 300))
+            if msg.auto_aim:
+                pygame.draw.rect(
+                    self.screen, (10, 180, 10), pygame.Rect(
+                        msg.target[0] - 60, msg.target[1] - 60, 120, 120), 3)
         pygame.display.flip()
 
     def feedback(self, out_queue: mp.Queue):
