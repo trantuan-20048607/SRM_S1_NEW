@@ -1,0 +1,10 @@
+# Ignore Jetbrains IDE profile.
+/.idea
+
+# Ignore Logs.
+/log/*
+!/log/.keep
+
+# Ignore temps.
+/tmp/*
+!/tmp/.keep
