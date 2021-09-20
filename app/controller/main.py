@@ -27,11 +27,17 @@ class S1Controller(Controller):
 
     def __init__(self, name: str, color: str, debug: bool):
         super(S1Controller, self).__init__()
+
         self.name = name
         self.color = color
         self.debug = debug
         self.hp = S1Controller.INITIAL_HP
         self.bat = S1Controller.INITIAL_BAT
+
+        self.last_cool_time = time.time()
+        self.hit_times, self.last_hit_times = 0, 0
+        self.target = (SCREEN_SIZE_X / 2, SCREEN_SIZE_Y / 2)
+
         if not debug:
             self.s1 = rm.robot.Robot()
             self.s1.initialize(conn_type='ap', proto_type='udp')
@@ -44,30 +50,35 @@ class S1Controller(Controller):
             self.s1.gimbal.sub_angle(callback=self.angle_callback)
             self.s1.armor.set_hit_sensitivity(sensitivity=10)
 
-        self.last_cool_time = time.time()
-        self.hit_times, self.last_hit_times = 0, 0
         logging.debug(self)
 
     def get_img(self):
         return self.s1.camera.read_cv2_image()
 
     def act(self, img, msg: Msg2Controller):
+
         if not self.debug:
             self.s1.chassis.drive_speed(x=msg.speed[0], y=msg.speed[1], z=0, timeout=1)
+
         logging.debug(f"SPD X{msg.speed[0]} Y{msg.speed[1]}")
 
         if msg.auto_aim is not None:
             self.auto_aim = msg.auto_aim
+
             logging.info("AUTO AIM %s" % {True: "ON", False: "OFF"}[self.auto_aim])
 
         if self.auto_aim:
             x, y = vision.armor(img, debug=self.debug, color=self.color)
-            logging.debug(f"AUTO AIM {x}, {y}")
             yaw = (x - SCREEN_SIZE_X / 2) / SCREEN_SIZE_X * 125
             pitch = (SCREEN_SIZE_Y / 2 - y) / SCREEN_SIZE_Y * 20
+            self.target = (x, y)
+
+            logging.debug(f"AUTO AIM {x}, {y}")
+
         else:
             yaw = msg.cur_delta[0] / SCREEN_SIZE_X * 120
             pitch = msg.cur_delta[1] / SCREEN_SIZE_Y * 20
+
         logging.debug(f"ROT Y{yaw} P{pitch}")
 
         if not self.debug:
@@ -83,9 +94,11 @@ class S1Controller(Controller):
             if not self.debug:
                 self.s1.blaster.set_led(200)
                 self.s1.blaster.fire(rm.blaster.INFRARED_FIRE, 1)
+
             self.heat += S1Controller.FIRE_HEAT
             if self.heat > S1Controller.MAX_HEAT:
                 self.__bleed(tag='burn')
+
             logging.info("FIRE")
 
     def hit(self):
@@ -97,11 +110,9 @@ class S1Controller(Controller):
     def cool(self):
         if 0.95 < time.time() - self.last_cool_time < 1.05:
             self.last_cool_time = time.time()
+            self.heat = max(self.heat - S1Controller.COOL_HEAT, 0)
+
             logging.info("COOLING DOWN")
-            if self.heat > S1Controller.COOL_HEAT:
-                self.heat -= S1Controller.COOL_HEAT
-            elif self.heat > 0:
-                self.heat = 0
 
     def __bleed(self, tag: str):
         if tag == 'hit':
@@ -120,12 +131,11 @@ class S1Controller(Controller):
             self.hp -= burn_hp
 
         if self.hp <= 0:
-            self.hp = 0
             self.__die()
 
     def __die(self):
-        logging.info("DIE")
         self.hp = 0
+
         if not self.debug:
             self.s1.chassis.drive_speed(x=0, y=0, z=0, timeout=1)
             self.s1.led.set_led(comp=rm.led.COMP_ALL, r={'red': 0, 'blue': 255}[self.color],
@@ -133,14 +143,22 @@ class S1Controller(Controller):
             self.s1.camera.stop_video_stream()
             self.s1.close()
 
+        logging.info("DIE")
+
     def battery_callback(self, bat):
+
         logging.info(f"BAT {bat}")
+
         self.bat = bat
+
         return bat
 
     def ir_hit_callback(self, hit):
+
         logging.info(f"HIT {hit} TIMES")
+
         self.hit_times = hit
+
         return hit
 
     @staticmethod
