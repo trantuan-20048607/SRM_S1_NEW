@@ -28,7 +28,7 @@ class Window(object):
         self.limit = True
         self.speed = (0, 0)
         self.fire_show_delay = 0
-        self.ctr_online = True
+        self.ctr_error = True
 
         logging.debug(self)
 
@@ -39,7 +39,7 @@ class Window(object):
                 "assets/DX_BOLD.ttf", 70).render("控制器出错", True, (160, 20, 10)), (465, 290))
             self.screen.blit(pygame.font.Font(
                 "assets/DX_BOLD.ttf", 50).render("程序将自动退出", True, (160, 20, 10)), (465, 360))
-            self.ctr_online = False
+            self.ctr_error = False
         else:
             ft = pygame.font.Font("assets/DX_BOLD.ttf", 30)
             if msg.hp * 3 > S1Controller.INITIAL_HP:

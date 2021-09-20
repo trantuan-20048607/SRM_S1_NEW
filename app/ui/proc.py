@@ -27,7 +27,7 @@ def start(debug: bool, in_queue: mp.Queue, out_queue: mp.Queue):
         else:
             msg = msg_cache
         window.update(msg, in_queue.qsize(), out_queue.qsize())
-        if not window.ctr_online:
+        if not window.ctr_error:
             time.sleep(5)
             break
         window.feedback(out_queue)
