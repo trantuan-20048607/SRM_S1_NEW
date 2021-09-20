@@ -2,9 +2,9 @@
 /.idea
 
 # Ignore Logs.
-/log/*
+/logs/*
 !/log/.keep
 
-# Ignore temps.
+# Ignore Temps.
 /tmp/*
 !/tmp/.keep
