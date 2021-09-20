@@ -7,6 +7,7 @@ from pygame.locals import *
 from app.controller.main import *
 from app.ui.msg import *
 from app.controller.msg import *
+from app.constants import *
 
 __all__ = ["Window"]
 
@@ -15,7 +16,6 @@ class Window(object):
     SPEED_MAP = {
         K_a: (0, -1), K_d: (0, 1), K_w: (1, 0), K_s: (-1, 0)
     }
-    SCREEN_SIZE = (1280, 720)
 
     def __init__(self, debug: bool):
 
@@ -26,7 +26,7 @@ class Window(object):
         pygame.event.set_grab(True)
 
         self.debug = debug
-        self.screen = pygame.display.set_mode(Window.SCREEN_SIZE, flags=pygame.DOUBLEBUF)
+        self.screen = pygame.display.set_mode(SCREEN_SIZE, flags=pygame.DOUBLEBUF)
         self.limit = True
         self.speed = (0, 0)
         self.fire_show_delay = 0
@@ -40,9 +40,13 @@ class Window(object):
 
         if msg.err:
             self.screen.blit(pygame.font.Font(
-                "assets/DX_BOLD.ttf", 70).render("控制器出错", True, (160, 20, 10)), (465, 290))
+                "assets/DX_BOLD.ttf", 70).render(
+                "控制器出错", True, (160, 20, 10)),
+                (int((SCREEN_SIZE[0] - 350) / 2), int(SCREEN_SIZE[1] / 2) - 70))
             self.screen.blit(pygame.font.Font(
-                "assets/DX_BOLD.ttf", 50).render("程序将自动退出", True, (160, 20, 10)), (465, 360))
+                "assets/DX_BOLD.ttf", 50).render(
+                "程序将自动退出", True, (160, 20, 10)),
+                (int((SCREEN_SIZE[0] - 350) / 2), int(SCREEN_SIZE[1] / 2)))
             self.ctr_error = False
 
         else:
@@ -76,7 +80,8 @@ class Window(object):
             if ctr_queue_size > 2:
                 self.screen.blit(ft.render("操作延迟", True, (160, 20, 10)), (100, 200))
 
-            if pygame.mouse.get_pos() != (640, 360) and not self.auto_aim:
+            if pygame.mouse.get_pos() != (int(SCREEN_SIZE[0] / 2), int(SCREEN_SIZE[1] / 2)) \
+                    and not self.auto_aim:
                 self.screen.blit(ft.render("瞄准", True, (160, 20, 10)), (160, 300))
             if self.fire_show_delay > 0:
                 self.screen.blit(ft.render("开火", True, (160, 20, 10)), (220, 300))
@@ -127,9 +132,9 @@ class Window(object):
 
                 if not self.limit:
                     cur_current = pygame.mouse.get_pos()
-                    if cur_current != (640, 360):
-                        cur_delta = (cur_current[0] - 640, cur_current[1] - 360)
-                        pygame.mouse.set_pos(640, 360)
+                    if cur_current != (int(SCREEN_SIZE[0] / 2), int(SCREEN_SIZE[1] / 2)):
+                        cur_delta = (cur_current[0] - int(SCREEN_SIZE[0] / 2), cur_current[1] - int(SCREEN_SIZE[1] / 2))
+                        pygame.mouse.set_pos(int(SCREEN_SIZE[0] / 2), int(SCREEN_SIZE[1] / 2))
 
             if not out_queue.full():
                 if (not self.limit and not self.auto_aim) or event.type != MOUSEMOTION:
@@ -150,7 +155,7 @@ class Window(object):
                 logging.warning("CTR MSG QUEUE FULL")
 
         if self.auto_aim:
-            pygame.mouse.set_pos(640, 360)
+            pygame.mouse.set_pos(int(SCREEN_SIZE[0] / 2), int(SCREEN_SIZE[1] / 2))
 
         if out_queue.empty():
             out_queue.put(Msg2Controller(speed=self.speed, auto_aim=self.auto_aim))

@@ -5,15 +5,9 @@ import robomaster as rm
 from app.core.controller import *
 from app.controller.msg import *
 from app.core import vision
+from app.constants import *
 
 __all__ = ["S1Controller"]
-
-IMAGE_POSITION_X = 100
-IMAGE_POSITION_Y = 100
-SCREEN_SIZE_X = 1280
-SCREEN_SIZE_Y = 720
-GIMBAL_SPEED_YAW = 100
-GIMBAL_SPEED_PITCH = 100
 
 
 class S1Controller(Controller):
@@ -24,6 +18,8 @@ class S1Controller(Controller):
     MAX_BURN_DMG = 35
     INITIAL_HP = 600
     INITIAL_BAT = 100
+    GIMBAL_SPEED_YAW = 100
+    GIMBAL_SPEED_PITCH = 100
 
     def __init__(self, name: str, color: str, debug: bool):
         super(S1Controller, self).__init__()
@@ -36,7 +32,7 @@ class S1Controller(Controller):
 
         self.last_cool_time = time.time()
         self.hit_times, self.last_hit_times = 0, 0
-        self.target = (SCREEN_SIZE_X / 2, SCREEN_SIZE_Y / 2)
+        self.target = (int(SCREEN_SIZE[0] / 2), int(SCREEN_SIZE[1] / 2))
 
         if not debug:
             self.s1 = rm.robot.Robot()
@@ -68,24 +64,25 @@ class S1Controller(Controller):
             logging.info("AUTO AIM %s" % {True: "ON", False: "OFF"}[self.auto_aim])
 
         if self.auto_aim:
-            x, y = vision.armor(img, debug=self.debug, color=self.color)
-            yaw = (x - SCREEN_SIZE_X / 2) / SCREEN_SIZE_X * 125
-            pitch = (SCREEN_SIZE_Y / 2 - y) / SCREEN_SIZE_Y * 20
+            x, y = vision.find_target(img, debug=self.debug, color=self.color)
+            yaw = (x - int(SCREEN_SIZE[0] / 2)) / SCREEN_SIZE[0] * 125
+            pitch = (int(SCREEN_SIZE[1] / 2) - y) / SCREEN_SIZE[1] * 20
             self.target = (x, y)
 
             logging.debug(f"AUTO AIM {x}, {y}")
 
         else:
-            yaw = msg.cur_delta[0] / SCREEN_SIZE_X * 120
-            pitch = msg.cur_delta[1] / SCREEN_SIZE_Y * 20
+            yaw = msg.cur_delta[0] / SCREEN_SIZE[0] * 120
+            pitch = msg.cur_delta[1] / SCREEN_SIZE[1] * 20
 
         logging.debug(f"ROT Y{yaw} P{pitch}")
 
         if not self.debug:
             if self.action_state:
                 if 50 > abs(yaw) >= 3 or 10 > abs(pitch) > 3:
-                    self.gimbal_action = self.s1.gimbal.move(yaw=yaw, pitch=pitch, pitch_speed=GIMBAL_SPEED_PITCH,
-                                                             yaw_speed=GIMBAL_SPEED_YAW)
+                    self.gimbal_action = self.s1.gimbal.move(yaw=yaw, pitch=pitch,
+                                                             pitch_speed=S1Controller.GIMBAL_SPEED_PITCH,
+                                                             yaw_speed=S1Controller.GIMBAL_SPEED_YAW)
                     self.action_state = self.gimbal_action.is_completed
             else:
                 self.action_state = self.gimbal_action.is_completed

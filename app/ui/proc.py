@@ -8,6 +8,7 @@ import numpy as np
 from PIL import Image
 from app.ui.msg import *
 from app.ui.main import *
+from app.constants import *
 
 
 def start(color: str, debug: bool, in_queue: mp.Queue, out_queue: mp.Queue, record: bool):
@@ -17,7 +18,7 @@ def start(color: str, debug: bool, in_queue: mp.Queue, out_queue: mp.Queue, reco
     if record:
         write_video = cv.VideoWriter(f"tmp/record_{color}.mp4",
                                      cv.VideoWriter_fourcc(*'avc1'), 30,
-                                     Window.SCREEN_SIZE, True)
+                                     SCREEN_SIZE, True)
 
     window = Window(debug)
     msg_cache = Msg2Window()
@@ -43,8 +44,8 @@ def start(color: str, debug: bool, in_queue: mp.Queue, out_queue: mp.Queue, reco
         window.update(msg, in_queue.qsize(), out_queue.qsize(), record)
 
         if record:
-            write_video.write(cv.cvtColor(np.asarray(Image.frombytes("RGB", Window.SCREEN_SIZE, pygame.image.tostring(
-                window.screen.subsurface(0, 0, Window.SCREEN_SIZE[0], Window.SCREEN_SIZE[1]), "RGB"))),
+            write_video.write(cv.cvtColor(np.asarray(Image.frombytes("RGB", SCREEN_SIZE, pygame.image.tostring(
+                window.screen.subsurface(0, 0, SCREEN_SIZE[0], SCREEN_SIZE[1]), "RGB"))),
                                           cv.COLOR_RGB2BGR))
 
         if not window.ctr_error:
@@ -60,4 +61,5 @@ def start(color: str, debug: bool, in_queue: mp.Queue, out_queue: mp.Queue, reco
     if record:
         write_video.release()
 
+    cv.destroyAllWindows()
     pygame.quit()
