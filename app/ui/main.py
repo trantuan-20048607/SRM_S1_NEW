@@ -15,6 +15,7 @@ class Window(object):
     SPEED_MAP = {
         K_a: (0, -1), K_d: (0, 1), K_w: (1, 0), K_s: (-1, 0)
     }
+    SCREEN_SIZE = (1280, 720)
 
     def __init__(self, debug: bool):
         pygame.init()
@@ -24,7 +25,7 @@ class Window(object):
         pygame.event.set_grab(True)
 
         self.debug = debug
-        self.screen = pygame.display.set_mode((1280, 720), flags=pygame.DOUBLEBUF)
+        self.screen = pygame.display.set_mode(Window.SCREEN_SIZE, flags=pygame.DOUBLEBUF)
         self.limit = True
         self.speed = (0, 0)
         self.fire_show_delay = 0

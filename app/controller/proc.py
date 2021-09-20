@@ -17,9 +17,6 @@ def start(color: str, debug: bool, in_queue: mp.Queue, out_queue: mp.Queue, reco
         video_src = "assets/s1%s.avi" % {"red": "blue", "blue": "red"}[color]
         read_video = cv.VideoCapture(video_src)
         video_fps = read_video.get(cv.CAP_PROP_FPS)
-    if record:
-        write_video = cv.VideoWriter(f"tmp/{time.strftime('%Y-%m-%d %H:%M:%S', time.gmtime())}_s1{color}.avi",
-                                     cv.VideoWriter_fourcc(*'XVID'), 30, (1280, 720), True)
 
     s1 = S1Controller("S1", color, debug)
     limit = False
@@ -39,16 +36,14 @@ def start(color: str, debug: bool, in_queue: mp.Queue, out_queue: mp.Queue, reco
 
         if debug:
             ret, img = read_video.read()
-            time.sleep(0.05 / video_fps)
+            if not record:
+                time.sleep(0.05 / video_fps)
             if not ret:
                 logging.debug("VIDEO ENDED")
                 terminate_window(out_queue)
                 break
         else:
             img = s1.get_img()
-
-        if record:
-            write_video.write(img)
 
         if not debug:
             s1.hit()

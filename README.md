@@ -17,9 +17,10 @@
 ## 二、环境依赖 ##
 
 魔改版框架和原版框架所需依赖没有任何区别，具体依赖如下：
-> pygame==2.0.1  
+> pillow==8.3.2  
 > numpy==1.21.2  
-> opencv_python==4.4.0.42  
+> opencv-python==4.4.0.42  
+> pygame==2.0.1  
 > robomaster==0.1.1.63
 
 在 requirements.txt 中列出了相同内容。

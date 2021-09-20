@@ -11,7 +11,6 @@ if __name__ == '__main__':
     parser.add_argument("--record", default=False, help="RECORDING VIDEO", action="store_true")
     args = parser.parse_args()
     assert args.red ^ args.blue
-    assert args.debug ^ args.record
     color = ""
     if args.red:
         color = "red"

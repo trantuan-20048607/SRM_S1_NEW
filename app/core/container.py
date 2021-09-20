@@ -28,8 +28,8 @@ class Container(object):
         ctr_proc.start()
         logging.info(ctr_proc)
         ui_proc = mp.Process(target=ui.start,
-                             args=(self.debug, msg_ctr_2_ui_queue,
-                                   msg_ui_2_ctr_queue),
+                             args=(self.color, self.debug, msg_ctr_2_ui_queue,
+                                   msg_ui_2_ctr_queue, self.record),
                              name="ui")
         ui_proc.start()
         logging.info(ui_proc)
