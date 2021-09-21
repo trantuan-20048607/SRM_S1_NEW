@@ -31,7 +31,7 @@ class Window(object):
         self.speed = (0, 0)
         self.fire_show_delay = 0
         self.ctr_error = True
-        self.auto_aim = False
+        self.aim_method = DEFAULT_AIM_METHOD
 
         logging.debug(self)
 
@@ -81,7 +81,7 @@ class Window(object):
                 self.screen.blit(ft.render("操作延迟", True, (160, 20, 10)), (100, 200))
 
             if pygame.mouse.get_pos() != (int(SCREEN_SIZE[0] / 2), int(SCREEN_SIZE[1] / 2)) \
-                    and not self.auto_aim:
+                    and msg.aim_method == "manual":
                 self.screen.blit(ft.render("瞄准", True, (160, 20, 10)), (160, 300))
             if self.fire_show_delay > 0:
                 self.screen.blit(ft.render("开火", True, (160, 20, 10)), (220, 300))
@@ -89,11 +89,16 @@ class Window(object):
             if self.speed[0] or self.speed[1]:
                 self.screen.blit(ft.render("移动", True, (160, 20, 10)), (100, 300))
 
-            if msg.auto_aim:
-                self.screen.blit(ft.render("自动瞄准", True, (10, 180, 10)), (100, 250))
+            if msg.aim_method != self.aim_method:
+                self.screen.blit(ft.render("瞄准模式切换中", True, (160, 20, 10)), (100, 250))
             else:
-                self.screen.blit(ft.render("手动瞄准", True, (250, 150, 50)), (100, 250))
-            if msg.auto_aim:
+                if msg.aim_method != "manual":
+                    self.screen.blit(ft.render("自动瞄准: %s" % {"tri": "三角负反馈", "kalman": "卡尔曼滤波"}[msg.aim_method],
+                                               True, (10, 180, 10)), (100, 250))
+                else:
+                    self.screen.blit(ft.render("手动瞄准", True, (250, 150, 50)), (100, 250))
+
+            if msg.aim_method != "manual":
                 pygame.draw.rect(
                     self.screen, (10, 180, 10), pygame.Rect(
                         msg.target[0] - 60, msg.target[1] - 60, 120, 120), 3)
@@ -111,7 +116,7 @@ class Window(object):
     def feedback(self, out_queue: mp.Queue):
         for event in pygame.event.get():
 
-            speed, auto_aim = self.speed, None
+            speed, aim_method = self.speed, self.aim_method
             term, cur_delta = event.type == QUIT, (0, 0)
 
             if event.type == KEYDOWN and event.key in Window.SPEED_MAP:
@@ -123,7 +128,7 @@ class Window(object):
                     term = True
 
                 if event.key in (K_q, K_e):
-                    auto_aim = {K_q: True, K_e: False}[event.key]
+                    aim_method = {K_q: AIM_METHOD_LIST[self.aim_method], K_e: "manual"}[event.key]
 
             elif event.type == KEYUP and event.key in Window.SPEED_MAP:
                 speed = (speed[0] - Window.SPEED_MAP[event.key][0], speed[1] - Window.SPEED_MAP[event.key][1])
@@ -137,25 +142,24 @@ class Window(object):
                         pygame.mouse.set_pos(int(SCREEN_SIZE[0] / 2), int(SCREEN_SIZE[1] / 2))
 
             if not out_queue.full():
-                if (not self.limit and not self.auto_aim) or event.type != MOUSEMOTION:
+                if (not self.limit and aim_method == "manual") or event.type != MOUSEMOTION:
 
                     if event.type == MOUSEBUTTONDOWN:
                         self.fire_show_delay = 10
-
-                    out_queue.put(Msg2Controller(speed=speed, cur_delta=cur_delta, auto_aim=auto_aim,
+                    if aim_method != self.aim_method:
+                        self.aim_method = aim_method
+                    out_queue.put(Msg2Controller(speed=speed, cur_delta=cur_delta, aim_method=self.aim_method,
                                                  fire=event.type == MOUSEBUTTONDOWN, terminate=term))
 
                     self.speed = speed
-                    if auto_aim is not None:
-                        self.auto_aim = auto_aim
 
                 self.limit = not self.limit
 
             else:
                 logging.warning("CTR MSG QUEUE FULL")
 
-        if self.auto_aim:
+        if self.aim_method != "manual":
             pygame.mouse.set_pos(int(SCREEN_SIZE[0] / 2), int(SCREEN_SIZE[1] / 2))
 
         if out_queue.empty():
-            out_queue.put(Msg2Controller(speed=self.speed, auto_aim=self.auto_aim))
+            out_queue.put(Msg2Controller(speed=self.speed, aim_method=self.aim_method))

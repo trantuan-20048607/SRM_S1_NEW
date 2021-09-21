@@ -47,10 +47,11 @@ SRM_S1_NEW
 │   │   ├───proc.py        # 控制器进程
 │   │   ├───main.py        # 功能实现
 │   │   └───msg.py         # 消息封装
-│   └───ui          # 界面
-│       ├───proc.py        # 界面进程
-│       ├───main.py        # 功能实现
-│       └───msg.py         # 消息封装
+│   ├───ui          # 界面
+│   │   ├───proc.py        # 界面进程
+│   │   ├───main.py        # 功能实现
+│   │   └───msg.py         # 消息封装
+│   └───constants.py  # 常量定义
 ├───logs     # 日志
 ├───tmp      # 临时输出
 └───main.py  # 程序入口

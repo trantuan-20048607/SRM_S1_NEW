@@ -75,11 +75,9 @@ def start(color: str, debug: bool, in_queue: mp.Queue, out_queue: mp.Queue, reco
                 if debug:
                     img = cv.transpose(img)
 
-                if s1.auto_aim:
                     out_queue.put(
-                        Msg2Window(img=img, hp=s1.hp, heat=s1.heat, bat=s1.bat, auto_aim=True, target=s1.target))
-                else:
-                    out_queue.put(Msg2Window(img=img, hp=s1.hp, heat=s1.heat, bat=s1.bat, auto_aim=False))
+                        Msg2Window(img=img, hp=s1.hp, heat=s1.heat, bat=s1.bat,
+                                   aim_method=s1.aim_method, target=s1.target))
 
         else:
             logging.warning("UI MSG QUEUE FULL")

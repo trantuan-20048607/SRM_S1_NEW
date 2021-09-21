@@ -29,6 +29,7 @@ class S1Controller(Controller):
         self.debug = debug
         self.hp = S1Controller.INITIAL_HP
         self.bat = S1Controller.INITIAL_BAT
+        self.aim_method = DEFAULT_AIM_METHOD
 
         self.last_cool_time = time.time()
         self.hit_times, self.last_hit_times = 0, 0
@@ -58,20 +59,24 @@ class S1Controller(Controller):
 
         logging.debug(f"SPD X{msg.speed[0]} Y{msg.speed[1]}")
 
-        if msg.auto_aim is not None:
-            self.auto_aim = msg.auto_aim
+        if msg.aim_method != self.aim_method:
+            self.aim_method = msg.aim_method
 
-            logging.info("AUTO AIM %s" % {True: "ON", False: "OFF"}[self.auto_aim])
+            if self.aim_method == "manual":
+                logging.info("AUTO AIM OFF")
+            else:
+                logging.info(f"AUTO AIM SWITCHED TO {self.aim_method.upper()}")
 
-        if self.auto_aim:
-            x, y = vision.find_target(img, debug=self.debug, color=self.color)
-            yaw = (x - int(SCREEN_SIZE[0] / 2)) / SCREEN_SIZE[0] * 125
-            pitch = (int(SCREEN_SIZE[1] / 2) - y) / SCREEN_SIZE[1] * 20
-            self.target = (x, y)
+        if self.aim_method != "manual":
+            auto_aim_x, auto_aim_y = vision.feed(img, debug=self.debug, color=self.color, tag=self.aim_method)
+            yaw = (auto_aim_x - int(SCREEN_SIZE[0] / 2)) / SCREEN_SIZE[0] * 125
+            pitch = (int(SCREEN_SIZE[1] / 2) - auto_aim_y) / SCREEN_SIZE[1] * 20
+            self.target = (auto_aim_x, auto_aim_y)
 
-            logging.debug(f"AUTO AIM {x}, {y}")
+            logging.debug(f"AUTO AIM {auto_aim_x}, {auto_aim_y}")
 
         else:
+            _, _ = vision.feed(img, debug=self.debug, color=self.color)
             yaw = msg.cur_delta[0] / SCREEN_SIZE[0] * 120
             pitch = msg.cur_delta[1] / SCREEN_SIZE[1] * 20
 
