@@ -93,7 +93,9 @@ class Window(object):
                 self.screen.blit(ft.render("瞄准模式切换中", True, (160, 20, 10)), (100, 250))
             else:
                 if msg.aim_method != "manual":
-                    self.screen.blit(ft.render("自动瞄准: %s" % {"tri": "三角负反馈", "kalman": "卡尔曼滤波"}[msg.aim_method],
+                    self.screen.blit(ft.render("自动瞄准: %s" % {"tri": "三角平滑",
+                                                             "kalman": "卡尔曼滤波",
+                                                             "direct": "原始数据"}[msg.aim_method],
                                                True, (10, 180, 10)), (100, 250))
                 else:
                     self.screen.blit(ft.render("手动瞄准", True, (250, 150, 50)), (100, 250))
@@ -110,8 +112,7 @@ class Window(object):
 
             if not self.debug:
                 self.screen.blit(ft.render(f"BAT: {msg.bat}", True, (10, 255, 10)), (800, 80))
-
-        pygame.display.flip()
+            pygame.display.flip()
 
     def feedback(self, out_queue: mp.Queue):
         for event in pygame.event.get():
@@ -128,7 +129,7 @@ class Window(object):
                     term = True
 
                 if event.key in (K_q, K_e):
-                    aim_method = {K_q: AIM_METHOD_LIST[self.aim_method], K_e: "manual"}[event.key]
+                    aim_method = {K_q: AIM_METHOD_SELECT_LIST[self.aim_method], K_e: "manual"}[event.key]
 
             elif event.type == KEYUP and event.key in Window.SPEED_MAP:
                 speed = (speed[0] - Window.SPEED_MAP[event.key][0], speed[1] - Window.SPEED_MAP[event.key][1])

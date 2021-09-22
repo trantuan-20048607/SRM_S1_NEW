@@ -10,7 +10,7 @@ class Msg2Controller(Msg):
                  aim_method: str = constants.DEFAULT_AIM_METHOD, fire: bool = False, terminate: bool = False):
         super(Msg2Controller, self).__init__()
 
-        assert aim_method in ("manual", "kalman", "tri")
+        assert aim_method in constants.AIM_METHOD_SELECT_LIST
 
         self.speed = speed
         self.cur_delta = cur_delta

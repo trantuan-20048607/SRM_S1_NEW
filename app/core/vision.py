@@ -2,22 +2,21 @@
 import numpy as np
 import cv2 as cv
 import itertools
-import math
 from app.constants import *
 
 __all__ = ["feed"]
 
 ROI_SIZE = (324, 324)
 
-# CONTROL VALUES FOR KARLAN FILTER, SMALLER IS BEST
+# CONTROL VALUES FOR KARLAN FILTER, SMALLER IS BETTER
 KALMAN_SHAKE_CONTROL = 1e-3
-KALMAN_DELAY_CONTROL = 1e-1
+KALMAN_DELAY_CONTROL = 1e-2
 
 # WEIGHTS FOR TRIANGULAR FEEDBACK
 TRIANGULAR_DIFFERENCE_WEIGHT = (1, 3, 2)
 
 # SIDE LEN THRESHOLD FOR TRIANGULAR FEEDBACK
-TRIANGULAR_MAX_SIDE_LEN = 40
+TRIANGULAR_MAX_SIDE_LEN = 44
 
 # DATA FOR KALMAN FILTER
 _kalman = cv.KalmanFilter(4, 2)
@@ -41,6 +40,10 @@ _last_mes = _current_mes = np.array([[SCREEN_SIZE[0] * 0.5],
 # DATA FOR TRIANGULAR FEEDBACK
 _d_t = (SCREEN_SIZE[0] * 0.5, SCREEN_SIZE[1] * 0.5)
 _d2_t = (SCREEN_SIZE[0] * 0.5, SCREEN_SIZE[1] * 0.5)
+
+# DATA FOR NO FEEDBACK
+_direct_target_data = (SCREEN_SIZE[0] / 2, SCREEN_SIZE[1] / 2)
+_direct_data_cache = (SCREEN_SIZE[0] / 2, SCREEN_SIZE[1] / 2)
 
 _roi_enabled = False
 
@@ -91,10 +94,17 @@ def _smooth(data: tuple, debug: bool):
 
 
 def _get_target_position(tag: str, debug: bool):
+    global _direct_data_cache
     if tag == "kalman":
         return int(_current_pre[0][0]), int(_current_pre[1][0])
     elif tag == "tri":
         return int(_d_t[0]), int(_d_t[1])
+    elif tag == "direct":
+        if _direct_target_data:
+            _direct_data_cache = _direct_target_data
+            return int(_direct_target_data[0]), int(_direct_target_data[1])
+        else:
+            return int(_direct_data_cache[0]), int(_direct_data_cache[1])
 
 
 def _update_triangular_feedback(data: tuple, debug: bool):
@@ -132,23 +142,23 @@ def _update_kalman(data: tuple, debug: bool):
     _current_pre = _kalman.predict()
 
 
-def feed(img: np.array, debug: bool, color: str, tag=AIM_METHOD_LIST[DEFAULT_AIM_METHOD]):
-    assert tag in ("kalman", "tri")
-    global _roi_enabled, _last_pre, _last_mes, _current_pre, _current_mes
+def feed(img: np.array, debug: bool, color: str, tag=AIM_METHOD_SELECT_LIST[DEFAULT_AIM_METHOD]):
+    assert tag in AUTO_AIM_METHOD_LIST
+    global _roi_enabled, _last_pre, _last_mes, _current_pre, _current_mes, _direct_target_data
     if not _roi_enabled:
-        tgt = _ident_tgt(img, debug, color)
-        if tgt:
+        _direct_target_data = _ident_tgt(img, debug, color)
+        if _direct_target_data:
             _roi_enabled = True
-            _smooth(tgt, debug)
+            _smooth(_direct_target_data, debug)
             return _get_target_position(tag, debug)
         else:
             return _get_target_position(tag, debug)
     else:
-        tgt = _ident_tgt(_roi_cut_img(img, (_last_pre[0][0], _last_pre[1][0]), ROI_SIZE), debug, color)
-        if tgt:
-            tgt = (tgt[0] - ROI_SIZE[0] * 0.5 + _last_pre[0][0],
-                   tgt[1] - ROI_SIZE[1] * 0.5 + _last_pre[1][0])
-            _smooth(tgt, debug)
+        _direct_target_data = _ident_tgt(_roi_cut_img(img, (_last_pre[0][0], _last_pre[1][0]), ROI_SIZE), debug, color)
+        if _direct_target_data:
+            _direct_target_data = (_direct_target_data[0] - ROI_SIZE[0] * 0.5 + _last_pre[0][0],
+                                   _direct_target_data[1] - ROI_SIZE[1] * 0.5 + _last_pre[1][0])
+            _smooth(_direct_target_data, debug)
             return _get_target_position(tag, debug)
         else:
             _roi_enabled = False
