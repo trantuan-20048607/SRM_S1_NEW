@@ -16,11 +16,8 @@ KALMAN_DELAY_CONTROL = 1e-1
 # WEIGHTS FOR TRIANGULAR FEEDBACK
 TRIANGULAR_DIFFERENCE_WEIGHT = (1, 3, 2)
 
-# ANGLE THRESHOLD FOR TRIANGULAR FEEDBACK
-TRIANGULAR_MIN_ANGLE = 0
-
 # SIDE LEN THRESHOLD FOR TRIANGULAR FEEDBACK
-TRIANGULAR_MAX_SIDE_LEN = 32
+TRIANGULAR_MAX_SIDE_LEN = 40
 
 # DATA FOR KALMAN FILTER
 _kalman = cv.KalmanFilter(4, 2)
@@ -116,24 +113,14 @@ def _update_triangular_feedback(data: tuple, debug: bool):
         _d2_t = _d_t
         _d_t = data
         return
-    angles = (math.acos((side_len[0] * side_len[0] + side_len[1] * side_len[1] -
-                         side_len[2] * side_len[2]) / (2 * side_len[0] * side_len[1])),
-              math.acos((side_len[0] * side_len[0] + side_len[2] * side_len[2] -
-                         side_len[1] * side_len[1]) / (2 * side_len[0] * side_len[2])),
-              math.acos((side_len[2] * side_len[2] + side_len[1] * side_len[1] -
-                         side_len[0] * side_len[0]) / (2 * side_len[2] * side_len[1]))
-              )
-    if min(angles) * 180 / math.pi < TRIANGULAR_MIN_ANGLE:
-        _d2_t = _d_t
-        _d_t = data
-    else:
-        g_center = TRIANGULAR_DIFFERENCE_WEIGHT[0] * points[0] + \
-                   TRIANGULAR_DIFFERENCE_WEIGHT[1] * points[1] + \
-                   TRIANGULAR_DIFFERENCE_WEIGHT[2] * points[2]
 
-        weight = TRIANGULAR_DIFFERENCE_WEIGHT[0] + TRIANGULAR_DIFFERENCE_WEIGHT[1] + TRIANGULAR_DIFFERENCE_WEIGHT[2]
-        _d2_t = _d_t
-        _d_t = (g_center[0] / weight, g_center[1] / weight)
+    g_center = TRIANGULAR_DIFFERENCE_WEIGHT[0] * points[0] + \
+               TRIANGULAR_DIFFERENCE_WEIGHT[1] * points[1] + \
+               TRIANGULAR_DIFFERENCE_WEIGHT[2] * points[2]
+
+    weight = TRIANGULAR_DIFFERENCE_WEIGHT[0] + TRIANGULAR_DIFFERENCE_WEIGHT[1] + TRIANGULAR_DIFFERENCE_WEIGHT[2]
+    _d2_t = _d_t
+    _d_t = (g_center[0] / weight, g_center[1] / weight)
 
 
 def _update_kalman(data: tuple, debug: bool):
