@@ -10,13 +10,13 @@ ROI_SIZE = (324, 324)
 
 # CONTROL VALUES FOR KARLAN FILTER, SMALLER IS BETTER
 KALMAN_SHAKE_CONTROL = 1e-3
-KALMAN_DELAY_CONTROL = 1e-2
+KALMAN_DELAY_CONTROL = 1e-1
 
 # WEIGHTS FOR TRIANGULAR FEEDBACK
-TRIANGULAR_DIFFERENCE_WEIGHT = (1, 3, 2)
+TRIANGULAR_DIFFERENCE_WEIGHT = ((1, 3, 2), (1, 1, 0), (3, 1, 0))
 
 # SIDE LEN THRESHOLD FOR TRIANGULAR FEEDBACK
-TRIANGULAR_MAX_SIDE_LEN = 44
+TRIANGULAR_SIDE_LEN_LEVEL = (32, 64)
 
 # DATA FOR KALMAN FILTER
 _kalman = cv.KalmanFilter(4, 2)
@@ -107,6 +107,13 @@ def _get_target_position(tag: str, debug: bool):
             return int(_direct_data_cache[0]), int(_direct_data_cache[1])
 
 
+def _triangular_weight(max_len: int or float):
+    for i in range(len(TRIANGULAR_SIDE_LEN_LEVEL)):
+        if max_len < TRIANGULAR_SIDE_LEN_LEVEL[i]:
+            return TRIANGULAR_DIFFERENCE_WEIGHT[i]
+    return TRIANGULAR_DIFFERENCE_WEIGHT[-1]
+
+
 def _update_triangular_feedback(data: tuple, debug: bool):
     global _d_t, _d2_t
     points = (np.array(data), np.array(_d_t), np.array(_d2_t))
@@ -118,19 +125,15 @@ def _update_triangular_feedback(data: tuple, debug: bool):
         _d_t = data
         return
     side_len = tuple(np.linalg.norm(s) for s in sides)
-    if abs(side_len[0]) < 1e-2 or abs(side_len[1]) < 1e-2 or abs(side_len[2]) < 1e-2 \
-            or max(side_len) > TRIANGULAR_MAX_SIDE_LEN:
-        _d2_t = _d_t
-        _d_t = data
-        return
+    weight = _triangular_weight(max(side_len))
+    g_center = weight[0] * points[0] + \
+               weight[1] * points[1] + \
+               weight[2] * points[2]
 
-    g_center = TRIANGULAR_DIFFERENCE_WEIGHT[0] * points[0] + \
-               TRIANGULAR_DIFFERENCE_WEIGHT[1] * points[1] + \
-               TRIANGULAR_DIFFERENCE_WEIGHT[2] * points[2]
-
-    weight = TRIANGULAR_DIFFERENCE_WEIGHT[0] + TRIANGULAR_DIFFERENCE_WEIGHT[1] + TRIANGULAR_DIFFERENCE_WEIGHT[2]
+    weight = weight[0] + weight[1] + weight[2]
     _d2_t = _d_t
     _d_t = (g_center[0] / weight, g_center[1] / weight)
+    return
 
 
 def _update_kalman(data: tuple, debug: bool):
