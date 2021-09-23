@@ -85,4 +85,4 @@ def start(color: str, debug: bool, in_queue: mp.Queue, out_queue: mp.Queue, reco
         if not limit:
             logging.debug(f"FPS {1 / (time.time() - time_start)}")
 
-        limit = not limit
+        limit = out_queue.qsize() > 2

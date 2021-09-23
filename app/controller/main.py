@@ -2,6 +2,7 @@
 import logging
 import time
 import robomaster as rm
+from app.benchmark.timer import *
 from app.core.controller import *
 from app.controller.msg import *
 from app.core import vision
@@ -52,6 +53,7 @@ class S1Controller(Controller):
     def get_img(self):
         return self.s1.camera.read_cv2_image()
 
+    @timing
     def act(self, img, msg: Msg2Controller):
 
         if not self.debug:

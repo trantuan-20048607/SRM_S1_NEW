@@ -47,6 +47,9 @@ SRM_S1_NEW
 │   │   ├───proc.py        # 控制器进程
 │   │   ├───main.py        # 功能实现
 │   │   └───msg.py         # 消息封装
+│   ├───benchmark   # 性能测试
+│   │   ├───timer.py       # 简易计时器
+│   │   └───cpu_usage.py   # 详细计时器
 │   ├───ui          # 界面
 │   │   ├───proc.py        # 界面进程
 │   │   ├───main.py        # 功能实现
@@ -69,6 +72,15 @@ SRM_S1_NEW
 
 ### 键位与操作 ###
 
-通过`WASD`操作移动；  
-按下`Q`开启瞄准，`E`关闭瞄准；  
-按下`Esc`退出。
+通过 `WASD` 操作移动；  
+按下 `Q` 开启瞄准，`E` 关闭瞄准；  
+按下 `Esc` 退出。
+
+### 性能测试 ###
+
+- 要测试某个函数的耗时，导入模块:  
+  `from app.benchmark.timer import *`  
+  后在函数定义前一行插入修饰器 `@timing` ，运行后可在对应的日志中查看
+- 要测试某个函数内部各个行为的耗时，导入模块:  
+  `from app.benchmark.cpu_usage import *`  
+  后在函数定义前一行插入修饰器 `@cpu_usage` ， 运行时将在控制台中显示

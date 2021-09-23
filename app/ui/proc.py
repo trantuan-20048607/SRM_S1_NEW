@@ -48,7 +48,7 @@ def start(color: str, debug: bool, in_queue: mp.Queue, out_queue: mp.Queue, reco
                 window.screen.subsurface(0, 0, SCREEN_SIZE[0], SCREEN_SIZE[1]), "RGB"))),
                                           cv.COLOR_RGB2BGR))
 
-        if not window.ctr_error:
+        if window.ctr_error:
             time.sleep(5)
             break
 

@@ -3,6 +3,8 @@ import multiprocessing as mp
 import cv2 as cv
 import pygame
 import logging
+from app.benchmark.timer import *
+from app.benchmark.cpu_usage import *
 from pygame.locals import *
 from app.controller.main import *
 from app.ui.msg import *
@@ -20,21 +22,22 @@ class Window(object):
     def __init__(self, debug: bool):
 
         pygame.init()
-        pygame.event.set_allowed([MOUSEBUTTONDOWN, KEYUP, KEYDOWN, MOUSEMOTION])
+        pygame.event.set_allowed([MOUSEBUTTONDOWN, KEYUP, KEYDOWN])
+        pygame.event.set_blocked(MOUSEMOTION)
         pygame.display.set_caption("SRM 校内赛")
         pygame.mouse.set_visible(debug)
         pygame.event.set_grab(True)
 
         self.debug = debug
         self.screen = pygame.display.set_mode(SCREEN_SIZE, flags=pygame.DOUBLEBUF)
-        self.limit = True
         self.speed = (0, 0)
         self.fire_show_delay = 0
-        self.ctr_error = True
+        self.ctr_error = False
         self.aim_method = DEFAULT_AIM_METHOD
 
         logging.debug(self)
 
+    @timing
     def update(self, msg: Msg2Window, ui_queue_size: int, ctr_queue_size: int, record: bool):
         pygame.surfarray.blit_array(self.screen, cv.cvtColor(msg.img, cv.COLOR_BGR2RGB))
 
@@ -47,7 +50,7 @@ class Window(object):
                 "assets/DX_BOLD.ttf", 50).render(
                 "程序将自动退出", True, (160, 20, 10)),
                 (int((SCREEN_SIZE[0] - 350) / 2), int(SCREEN_SIZE[1] / 2)))
-            self.ctr_error = False
+            self.ctr_error = True
 
         else:
             ft = pygame.font.Font("assets/DX_BOLD.ttf", 30)
@@ -114,9 +117,9 @@ class Window(object):
                 self.screen.blit(ft.render(f"BAT: {msg.bat}", True, (10, 255, 10)), (800, 80))
             pygame.display.flip()
 
+    @timing
     def feedback(self, out_queue: mp.Queue):
         for event in pygame.event.get():
-
             speed, aim_method = self.speed, self.aim_method
             term, cur_delta = event.type == QUIT, (0, 0)
 
@@ -135,27 +138,23 @@ class Window(object):
                 speed = (speed[0] - Window.SPEED_MAP[event.key][0], speed[1] - Window.SPEED_MAP[event.key][1])
 
             if not out_queue.full():
-                if (not self.limit and aim_method == "manual") or event.type != MOUSEMOTION:
+                if event.type == MOUSEBUTTONDOWN:
+                    self.fire_show_delay = 10
 
-                    if event.type == MOUSEBUTTONDOWN:
-                        self.fire_show_delay = 10
+                if aim_method != self.aim_method:
+                    self.aim_method = aim_method
 
-                    if aim_method != self.aim_method:
-                        self.aim_method = aim_method
+                if self.aim_method == "manual":
+                    cur_current = pygame.mouse.get_pos()
+                    if cur_current != (int(SCREEN_SIZE[0] / 2), int(SCREEN_SIZE[1] / 2)):
+                        cur_delta = (cur_current[0] - int(SCREEN_SIZE[0] / 2),
+                                     cur_current[1] - int(SCREEN_SIZE[1] / 2))
+                        pygame.mouse.set_pos(int(SCREEN_SIZE[0] / 2), int(SCREEN_SIZE[1] / 2))
 
-                    if self.aim_method == "manual":
-                        cur_current = pygame.mouse.get_pos()
-                        if cur_current != (int(SCREEN_SIZE[0] / 2), int(SCREEN_SIZE[1] / 2)):
-                            cur_delta = (cur_current[0] - int(SCREEN_SIZE[0] / 2),
-                                         cur_current[1] - int(SCREEN_SIZE[1] / 2))
-                            pygame.mouse.set_pos(int(SCREEN_SIZE[0] / 2), int(SCREEN_SIZE[1] / 2))
+                out_queue.put(Msg2Controller(speed=speed, cur_delta=cur_delta, aim_method=self.aim_method,
+                                             fire=event.type == MOUSEBUTTONDOWN, terminate=term))
 
-                    out_queue.put(Msg2Controller(speed=speed, cur_delta=cur_delta, aim_method=self.aim_method,
-                                                 fire=event.type == MOUSEBUTTONDOWN, terminate=term))
-
-                    self.speed = speed
-
-                self.limit = not self.limit
+                self.speed = speed
 
             else:
                 logging.warning("CTR MSG QUEUE FULL")

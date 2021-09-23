@@ -24,14 +24,6 @@ class Container(object):
         msg_ui_2_ctr_queue = mp.Queue()
         msg_ctr_2_ui_queue = mp.Queue()
 
-        ctr_proc = mp.Process(target=controller.start,
-                              args=(self.color, self.debug, msg_ui_2_ctr_queue,
-                                    msg_ctr_2_ui_queue, self.record),
-                              name="controller")
-        ctr_proc.start()
-
-        logging.info(ctr_proc)
-
         ui_proc = mp.Process(target=ui.start,
                              args=(self.color, self.debug, msg_ctr_2_ui_queue,
                                    msg_ui_2_ctr_queue, self.record),
@@ -39,6 +31,14 @@ class Container(object):
         ui_proc.start()
 
         logging.info(ui_proc)
+
+        ctr_proc = mp.Process(target=controller.start,
+                              args=(self.color, self.debug, msg_ui_2_ctr_queue,
+                                    msg_ctr_2_ui_queue, self.record),
+                              name="controller")
+        ctr_proc.start()
+
+        logging.info(ctr_proc)
 
         ctr_proc.join()
         ui_proc.join()
