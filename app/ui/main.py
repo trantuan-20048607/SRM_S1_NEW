@@ -4,7 +4,6 @@ import cv2 as cv
 import pygame
 import logging
 from app.benchmark.timer import *
-from app.benchmark.cpu_usage import *
 from pygame.locals import *
 from app.controller.main import *
 from app.ui.msg import *
