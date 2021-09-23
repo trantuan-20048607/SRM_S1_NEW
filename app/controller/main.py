@@ -70,12 +70,11 @@ class S1Controller(Controller):
                 logging.info(f"AUTO AIM SWITCHED TO {self.aim_method.upper()}")
 
         if self.aim_method != "manual":
-            auto_aim_x, auto_aim_y = vision.feed(img, debug=self.debug, color=self.color, tag=self.aim_method)
-            yaw = (auto_aim_x - int(SCREEN_SIZE[0] / 2)) / SCREEN_SIZE[0] * 125
-            pitch = (int(SCREEN_SIZE[1] / 2) - auto_aim_y) / SCREEN_SIZE[1] * 20
-            self.target = (auto_aim_x, auto_aim_y)
+            self.target = vision.feed(img, debug=self.debug, color=self.color, tag=self.aim_method)
+            yaw = (self.target[0] - int(SCREEN_SIZE[0] / 2)) / SCREEN_SIZE[0] * 125
+            pitch = (int(SCREEN_SIZE[1] / 2) - self.target[1]) / SCREEN_SIZE[1] * 20
 
-            logging.debug(f"AUTO AIM {auto_aim_x}, {auto_aim_y}")
+            logging.debug(f"AUTO AIM {self.target[0]}, {self.target[1]}")
 
         else:
             _, _ = vision.feed(img, debug=self.debug, color=self.color)
