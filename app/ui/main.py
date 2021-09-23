@@ -96,7 +96,7 @@ class Window(object):
             else:
                 if msg.aim_method != "manual":
                     self.screen.blit(ft.render("自动瞄准: %s" % {"tri": "差分反馈",
-                                                             "kalman": "卡尔曼滤波",
+                                                             "kalman": "KALMAN",
                                                              "direct": "原始数据"}[msg.aim_method],
                                                True, (10, 180, 10)), (100, 250))
                 else:
