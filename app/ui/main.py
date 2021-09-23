@@ -95,7 +95,7 @@ class Window(object):
                 self.screen.blit(ft.render("瞄准模式切换中", True, (160, 20, 10)), (100, 250))
             else:
                 if msg.aim_method != "manual":
-                    self.screen.blit(ft.render("自动瞄准: %s" % {"tri": "三角平滑",
+                    self.screen.blit(ft.render("自动瞄准: %s" % {"tri": "差分反馈",
                                                              "kalman": "卡尔曼滤波",
                                                              "direct": "原始数据"}[msg.aim_method],
                                                True, (10, 180, 10)), (100, 250))
