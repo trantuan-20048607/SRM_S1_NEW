@@ -13,10 +13,10 @@ KALMAN_SHAKE_CONTROL = 1e-3
 KALMAN_DELAY_CONTROL = 1e-1
 
 # WEIGHTS FOR TRIANGULAR FEEDBACK
-TRIANGULAR_DIFFERENCE_WEIGHT = ((1, 3, 2), (1, 1, 0), (3, 1, 0))
+TRIANGULAR_DIFFERENCE_WEIGHT = ((1, 3, 2), (2, 2, 1), (3, 1, 0))
 
 # SIDE LEN THRESHOLD FOR TRIANGULAR FEEDBACK
-TRIANGULAR_SIDE_LEN_LEVEL = (32, 64)
+TRIANGULAR_SIDE_LEN_LEVEL = (24, 56)
 
 # DATA FOR KALMAN FILTER
 _kalman = cv.KalmanFilter(4, 2)
@@ -80,8 +80,6 @@ def _ident_tgt(img: np.array, debug: bool, color: str) -> tuple or None:
                 weight += a
                 center[0] += x * a
                 center[1] += y * a
-                cv.rectangle(img_color, (x, y), (x + w, y + h), (182, 89, 155), 2)
-
     if weight > 18:
         return center[0] / weight, center[1] / weight
     else:
@@ -118,12 +116,6 @@ def _update_triangular_feedback(data: tuple, debug: bool):
     global _d_t, _d2_t
     points = (np.array(data), np.array(_d_t), np.array(_d2_t))
     sides = tuple(x - y for x, y in itertools.combinations(points, 2))
-    if abs(np.cross(sides[0], sides[1])) < 1e-2 \
-            or abs(np.cross(sides[2], sides[1])) < 1e-2 \
-            or abs(np.cross(sides[0], sides[2])) < 1e-2:
-        _d2_t = _d_t
-        _d_t = data
-        return
     side_len = tuple(np.linalg.norm(s) for s in sides)
     weight = _triangular_weight(max(side_len))
     g_center = weight[0] * points[0] + \
@@ -145,7 +137,7 @@ def _update_kalman(data: tuple, debug: bool):
     _current_pre = _kalman.predict()
 
 
-def feed(img: np.array, debug: bool, color: str, tag=AIM_METHOD_SELECT_LIST[DEFAULT_AIM_METHOD]):
+def feed(img: np.array, debug: bool, color: str, tag: str = AIM_METHOD_SELECT_LIST[DEFAULT_AIM_METHOD]):
     assert tag in AUTO_AIM_METHOD_LIST
     global _roi_enabled, _last_pre, _last_mes, _current_pre, _current_mes, _direct_target_data
     if not _roi_enabled:
