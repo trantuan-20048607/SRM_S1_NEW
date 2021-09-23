@@ -32,10 +32,10 @@ _kalman.processNoiseCov = np.array([[1, 0, 0, 0],
                                     [0, 0, 0, 1]], np.float32) * KALMAN_SHAKE_CONTROL
 _kalman.measurementNoiseCov = np.array([[1, 0],
                                         [0, 1]], np.float32) * KALMAN_DELAY_CONTROL
-_last_pre = _current_pre = np.array([[SCREEN_SIZE[0] * 0.5],
-                                     [SCREEN_SIZE[1] * 0.5]], np.float32)
-_last_mes = _current_mes = np.array([[SCREEN_SIZE[0] * 0.5],
-                                     [SCREEN_SIZE[1] * 0.5]], np.float32)
+_last_pre = _current_pre = np.array([[0],
+                                     [0]], np.float32)
+_last_mes = _current_mes = np.array([[0],
+                                     [0]], np.float32)
 
 # DATA FOR TRIANGULAR FEEDBACK
 _d_t = (SCREEN_SIZE[0] * 0.5, SCREEN_SIZE[1] * 0.5)
