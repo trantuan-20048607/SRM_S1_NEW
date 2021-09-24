@@ -8,19 +8,6 @@ from app.constants import *
 
 __all__ = ["feed"]
 
-ROI_SIZE = (324, 324)
-
-# CONTROL VALUES FOR KARLAN FILTER, SMALLER IS BETTER
-KALMAN_SHAKE_CONTROL = 1e-3
-KALMAN_DELAY_CONTROL = 1e-1
-
-# WEIGHTS FOR TRIANGULAR FEEDBACK
-TRIANGULAR_DIFFERENCE_WEIGHT = ((1, 3, 2), (2, 2, 1), (3, 1, 0))
-
-# SIDE LEN THRESHOLD FOR TRIANGULAR FEEDBACK
-TRIANGULAR_SIDE_LEN_LEVEL = (24, 56)
-
-# DATA FOR KALMAN FILTER
 _kalman = cv.KalmanFilter(4, 2)
 _kalman.measurementMatrix = np.array([[1, 0, 0, 0],
                                       [0, 1, 0, 0]], np.float32)
@@ -39,13 +26,11 @@ _last_pre = _current_pre = np.array([[0],
 _last_mes = _current_mes = np.array([[0],
                                      [0]], np.float32)
 
-# DATA FOR TRIANGULAR FEEDBACK
 _d_t = (SCREEN_SIZE[0] * 0.5, SCREEN_SIZE[1] * 0.5)
 _d2_t = (SCREEN_SIZE[0] * 0.5, SCREEN_SIZE[1] * 0.5)
 
-# DATA FOR NO FEEDBACK
-_direct_target_data = (SCREEN_SIZE[0] / 2, SCREEN_SIZE[1] / 2)
-_direct_data_cache = (SCREEN_SIZE[0] / 2, SCREEN_SIZE[1] / 2)
+_direct_target_data = (SCREEN_SIZE[0] * 0.5, SCREEN_SIZE[1] * 0.5)
+_direct_data_cache = (SCREEN_SIZE[0] * 0.5, SCREEN_SIZE[1] * 0.5)
 
 _roi_enabled = False
 
@@ -56,6 +41,8 @@ def _roi_cut_img(img: np.array, center: tuple, size: tuple):
 
 
 def _ident_tgt(img: np.array, debug: bool, color: str) -> tuple or None:
+    assert color in COLOR_LIST
+
     img_hsv = cv.cvtColor(img, cv.COLOR_BGR2HSV)
     if color == "red":
         img_color = cv.bitwise_and(
@@ -69,6 +56,9 @@ def _ident_tgt(img: np.array, debug: bool, color: str) -> tuple or None:
             cv.bitwise_and(
                 img, img, mask=cv.inRange(
                     img_hsv, np.array([0, 112, 102]), np.array([8, 255, 255]))))
+    else:
+        img_color = img_hsv
+
     cv.medianBlur(img_color, 3, img_color)
     _, binary = cv.threshold(cv.cvtColor(img_color, cv.COLOR_BGR2GRAY), 16, 255, cv.THRESH_BINARY)
     contours, _ = cv.findContours(binary, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE)
@@ -141,6 +131,8 @@ def _update_kalman(data: tuple, debug: bool):
 
 def feed(img: np.array, debug: bool, color: str, tag: str = AIM_METHOD_SELECT_LIST[DEFAULT_AIM_METHOD]):
     assert tag in AUTO_AIM_METHOD_LIST
+    assert color in COLOR_LIST
+
     global _roi_enabled, _last_pre, _last_mes, _current_pre, _current_mes, _direct_target_data
     if not _roi_enabled:
         _direct_target_data = _ident_tgt(img, debug, color)

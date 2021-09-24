@@ -27,6 +27,8 @@ class S1Controller(Controller):
     def __init__(self, name: str, color: str, debug: bool):
         super(S1Controller, self).__init__()
 
+        assert color in COLOR_LIST
+
         self.name = name
         self.color = color
         self.debug = debug
@@ -55,7 +57,7 @@ class S1Controller(Controller):
     def get_img(self):
         return self.s1.camera.read_cv2_image()
 
-    @timing
+    @timer
     def act(self, img, msg: Msg2Controller):
 
         if not self.debug:
@@ -143,8 +145,12 @@ class S1Controller(Controller):
 
         if not self.debug:
             self.s1.chassis.drive_speed(x=0, y=0, z=0, timeout=1)
-            self.s1.led.set_led(comp=rm.led.COMP_ALL, r={'red': 0, 'blue': 255}[self.color],
-                                g=0, b={'red': 255, 'blue': 0}[self.color], effect=rm.led.EFFECT_FLASH, freq=1)
+            self.s1.led.set_led(comp=rm.led.COMP_ALL,
+                                r={'red': 0, 'blue': 255}[self.color],
+                                g=0,
+                                b={'red': 255, 'blue': 0}[self.color],
+                                effect=rm.led.EFFECT_FLASH,
+                                freq=1)
             self.s1.camera.stop_video_stream()
             self.s1.close()
 

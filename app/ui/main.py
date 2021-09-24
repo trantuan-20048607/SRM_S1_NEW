@@ -38,7 +38,7 @@ class Window(object):
 
         logging.debug(self)
 
-    @timing
+    @timer
     def update(self, msg: Msg2Window, ui_queue_size: int, ctr_queue_size: int, record: bool):
         pygame.surfarray.blit_array(self.screen, cv.cvtColor(msg.img, cv.COLOR_BGR2RGB))
 
@@ -79,9 +79,9 @@ class Window(object):
                     "assets/DX_BOLD.ttf", 20).render(
                     "录像模式", True, (160, 20, 10)), (8, 8))
 
-            if ui_queue_size > 2:
+            if ui_queue_size > QUEUE_BLOCK_THRESH:
                 self.screen.blit(ft.render("显示延迟", True, (160, 20, 10)), (100, 150))
-            if ctr_queue_size > 2:
+            if ctr_queue_size > QUEUE_BLOCK_THRESH:
                 self.screen.blit(ft.render("操作延迟", True, (160, 20, 10)), (100, 200))
 
             if pygame.mouse.get_pos() != (int(SCREEN_SIZE[0] / 2), int(SCREEN_SIZE[1] / 2)) \
@@ -118,7 +118,7 @@ class Window(object):
                 self.screen.blit(ft.render(f"BAT: {msg.bat}", True, (10, 255, 10)), (800, 80))
             pygame.display.flip()
 
-    @timing
+    @timer
     def feedback(self, out_queue: mp.Queue):
         for event in pygame.event.get():
             speed, aim_method = self.speed, self.aim_method
@@ -132,7 +132,7 @@ class Window(object):
                 if event.key == K_ESCAPE:
                     term = True
 
-                if event.key in (K_q, K_e):
+                elif event.key in (K_q, K_e):
                     aim_method = {K_q: AIM_METHOD_SELECT_LIST[self.aim_method], K_e: "manual"}[event.key]
 
             elif event.type == KEYUP and event.key in Window.SPEED_MAP:
@@ -140,7 +140,7 @@ class Window(object):
 
             if not out_queue.full():
                 if event.type == MOUSEBUTTONDOWN:
-                    self.fire_show_delay = 10
+                    self.fire_show_delay = FIRE_UI_SHOW_TIME
 
                 if aim_method != self.aim_method:
                     self.aim_method = aim_method

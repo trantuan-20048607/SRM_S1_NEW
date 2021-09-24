@@ -3,16 +3,16 @@ import logging
 from functools import wraps
 from time import time
 
-__all__ = ["timing"]
+__all__ = ["timer"]
 
 
-def timing(func):
-    @wraps(func)
-    def wrap(*args, **kw):
+def timer(method):
+    @wraps(method)
+    def wrap(*args, **kwargs):
         time_start = time()
-        result = func(*args, **kw)
+        result = method(*args, **kwargs)
         time_end = time()
-        logging.debug('FUNC: %r TOOK: %2.4f sec' % (func.__name__, time_end - time_start))
+        logging.debug('FUNC: %r TOOK: %2.4f sec' % (method.__name__, time_end - time_start))
         return result
 
     return wrap

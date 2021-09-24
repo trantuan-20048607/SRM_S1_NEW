@@ -5,12 +5,15 @@ import time
 
 import cv2 as cv
 
+from app.constants import *
 from app.controller.main import *
 from app.controller.msg import *
 from app.ui.msg import *
 
 
 def start(color: str, debug: bool, in_queue: mp.Queue, out_queue: mp.Queue, record: bool):
+    assert color in COLOR_LIST
+
     logging.basicConfig(level={True: logging.DEBUG, False: logging.INFO}[debug],
                         filename="logs/controller.log", filemode='w',
                         format="%(asctime)s - %(pathname)s[line:%(lineno)d] - %(levelname)s: %(message)s")
@@ -58,6 +61,7 @@ def start(color: str, debug: bool, in_queue: mp.Queue, out_queue: mp.Queue, reco
 
             try:
                 s1.act(img, msg)
+
             except Exception as e:
                 logging.error(e)
 
@@ -86,4 +90,4 @@ def start(color: str, debug: bool, in_queue: mp.Queue, out_queue: mp.Queue, reco
         if not limit:
             logging.debug(f"FPS {1 / (time.time() - time_start)}")
 
-        limit = out_queue.qsize() > 2
+        limit = out_queue.qsize() > QUEUE_BLOCK_THRESH

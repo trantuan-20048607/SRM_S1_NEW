@@ -14,12 +14,14 @@ from app.ui.msg import *
 
 
 def start(color: str, debug: bool, in_queue: mp.Queue, out_queue: mp.Queue, record: bool):
+    assert color in COLOR_LIST
+
     logging.basicConfig(level={True: logging.DEBUG, False: logging.INFO}[debug], filename="logs/ui.log", filemode='w',
                         format="%(asctime)s - %(pathname)s[line:%(lineno)d] - %(levelname)s: %(message)s")
 
     if record:
         write_video = cv.VideoWriter(f"tmp/record_{color}.mp4",
-                                     cv.VideoWriter_fourcc(*'avc1'), 30,
+                                     cv.VideoWriter_fourcc(*'avc1'), RECORDING_FPS,
                                      SCREEN_SIZE, True)
 
     window = Window(debug)

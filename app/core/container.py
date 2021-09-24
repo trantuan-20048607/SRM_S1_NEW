@@ -4,15 +4,15 @@ import multiprocessing as mp
 
 import app.controller.proc as controller
 import app.ui.proc as ui
+from app.constants import *
 
 __all__ = ["Container"]
 
 
 class Container(object):
-    COLORS = ["red", "blue"]
 
     def __init__(self, color: str, debug: bool, record: bool):
-        assert color in Container.COLORS
+        assert color in COLOR_LIST
 
         self.color = color
         self.debug = debug
