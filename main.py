@@ -26,3 +26,4 @@ if __name__ == '__main__':
 
     app = Container(color, args.debug, args.record)
     app.start()
+
