@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 import logging
-import time
-import app.ui.proc as ui
-import app.controller.proc as controller
 import multiprocessing as mp
+
+import app.controller.proc as controller
+import app.ui.proc as ui
 
 __all__ = ["Container"]
 

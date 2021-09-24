@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
-from app.core.msg import *
 import cv2 as cv
 import numpy as np
+
+from app.core.msg import *
 
 __all__ = ["Msg2Window"]
 

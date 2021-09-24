@@ -1,14 +1,16 @@
 # -*- coding: utf-8 -*-
 import logging
-import time
 import multiprocessing as mp
+import time
+
 import cv2 as cv
-import pygame
 import numpy as np
+import pygame
 from PIL import Image
-from app.ui.msg import *
-from app.ui.main import *
+
 from app.constants import *
+from app.ui.main import *
+from app.ui.msg import *
 
 
 def start(color: str, debug: bool, in_queue: mp.Queue, out_queue: mp.Queue, record: bool):

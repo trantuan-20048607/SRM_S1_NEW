@@ -1,14 +1,16 @@
 # -*- coding: utf-8 -*-
+import logging
 import multiprocessing as mp
+
 import cv2 as cv
 import pygame
-import logging
-from app.benchmark.timer import *
 from pygame.locals import *
-from app.controller.main import *
-from app.ui.msg import *
-from app.controller.msg import *
+
+from app.benchmark.timer import *
 from app.constants import *
+from app.controller.main import *
+from app.controller.msg import *
+from app.ui.msg import *
 
 __all__ = ["Window"]
 

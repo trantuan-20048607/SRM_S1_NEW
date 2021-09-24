@@ -1,7 +1,9 @@
 # -*- coding: utf-8 -*-
-import numpy as np
-import cv2 as cv
 import itertools
+
+import cv2 as cv
+import numpy as np
+
 from app.constants import *
 
 __all__ = ["feed"]

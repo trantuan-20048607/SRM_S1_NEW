@@ -1,8 +1,7 @@
 # -*- coding: utf-8 -*-
-from functools import wraps
 import cProfile
 import pstats
-import io
+from functools import wraps
 from pstats import SortKey
 
 __all__ = ["cpu_usage"]

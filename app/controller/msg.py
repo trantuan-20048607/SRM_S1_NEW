@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-from app.core.msg import *
 from app import constants
+from app.core.msg import *
 
 __all__ = ["Msg2Controller"]
 

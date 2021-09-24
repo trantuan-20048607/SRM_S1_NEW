@@ -1,12 +1,14 @@
 # -*- coding: utf-8 -*-
 import logging
 import time
+
 import robomaster as rm
+
 from app.benchmark.timer import *
-from app.core.controller import *
+from app.constants import *
 from app.controller.msg import *
 from app.core import vision
-from app.constants import *
+from app.core.controller import *
 
 __all__ = ["S1Controller"]
 

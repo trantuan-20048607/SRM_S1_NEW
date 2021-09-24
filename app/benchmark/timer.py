@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-from functools import wraps
 import logging
+from functools import wraps
 from time import time
 
 __all__ = ["timing"]
