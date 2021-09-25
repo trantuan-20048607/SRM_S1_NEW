@@ -6,7 +6,6 @@ import cv2 as cv
 import pygame
 from pygame.locals import *
 
-from app.benchmark.timer import *
 from app.constants import *
 from app.controller.main import *
 from app.controller.msg import *
@@ -38,7 +37,6 @@ class Window(object):
 
         logging.debug(self)
 
-    @timer
     def update(self, msg: Msg2Window, ui_queue_size: int, ctr_queue_size: int, record: bool):
         pygame.surfarray.blit_array(self.screen, cv.cvtColor(msg.img, cv.COLOR_BGR2RGB))
 
@@ -118,7 +116,6 @@ class Window(object):
                 self.screen.blit(ft.render(f"BAT: {msg.bat}", True, (10, 255, 10)), (800, 80))
             pygame.display.flip()
 
-    @timer
     def feedback(self, out_queue: mp.Queue):
         for event in pygame.event.get():
             speed, aim_method = self.speed, self.aim_method

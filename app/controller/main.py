@@ -4,7 +4,6 @@ import time
 
 import robomaster as rm
 
-from app.benchmark.timer import *
 from app.constants import *
 from app.controller.msg import *
 from app.core import vision
@@ -42,10 +41,12 @@ class S1Controller(Controller):
 
         if not debug:
             self.s1 = rm.robot.Robot()
-            self.s1.initialize(conn_type='ap', proto_type='udp')
+            self.s1.initialize(conn_type="ap", proto_type="udp")
             logging.debug(self.s1.set_robot_mode(mode=rm.robot.GIMBAL_LEAD))
-            self.s1.led.set_led(comp=rm.led.COMP_ALL, r={'red': 255, 'blue': 0}[color],
-                                g=0, b={'red': 0, 'blue': 255}[color], effect=rm.led.EFFECT_ON)
+            self.s1.led.set_led(comp=rm.led.COMP_ALL,
+                                r=COLOR_RGB_LIST[color][0],
+                                g=COLOR_RGB_LIST[color][1],
+                                b=COLOR_RGB_LIST[color][2], effect=rm.led.EFFECT_ON)
             self.s1.camera.start_video_stream(display=False)
             self.s1.armor.sub_ir_event(callback=self.ir_hit_callback)
             self.s1.battery.sub_battery_info(freq=5, callback=self.battery_callback)
@@ -57,7 +58,6 @@ class S1Controller(Controller):
     def get_img(self):
         return self.s1.camera.read_cv2_image()
 
-    @timer
     def act(self, img, msg: Msg2Controller):
 
         if not self.debug:
@@ -74,14 +74,13 @@ class S1Controller(Controller):
                 logging.info(f"AUTO AIM SWITCHED TO {self.aim_method.upper()}")
 
         if self.aim_method != "manual":
-            self.target = vision.feed(img, debug=self.debug, color=self.color, tag=self.aim_method)
+            self.target = vision.feed(img, color=COLOR_ENEMY_LIST[self.color], tag=self.aim_method)
             yaw = (self.target[0] - int(SCREEN_SIZE[0] / 2)) / SCREEN_SIZE[0] * 125
             pitch = (int(SCREEN_SIZE[1] / 2) - self.target[1]) / SCREEN_SIZE[1] * 20
 
             logging.debug(f"AUTO AIM {self.target[0]}, {self.target[1]}")
 
         else:
-            _, _ = vision.feed(img, debug=self.debug, color=self.color)
             yaw = msg.cur_delta[0] / SCREEN_SIZE[0] * 120
             pitch = msg.cur_delta[1] / SCREEN_SIZE[1] * 20
 
@@ -104,14 +103,14 @@ class S1Controller(Controller):
 
             self.heat += S1Controller.FIRE_HEAT
             if self.heat > S1Controller.MAX_HEAT:
-                self.__bleed(tag='burn')
+                self.__bleed(tag="burn")
 
             logging.info("FIRE")
 
     def hit(self):
         if self.hit_times > self.last_hit_times:
             for _ in range(self.last_hit_times, self.hit_times):
-                self.__bleed(tag='hit')
+                self.__bleed(tag="hit")
             self.last_hit_times = self.hit_times
 
     def cool(self):
@@ -122,18 +121,23 @@ class S1Controller(Controller):
             logging.info("COOLING DOWN")
 
     def __bleed(self, tag: str):
-        if tag == 'hit':
+        if tag == "hit":
             self.hp -= S1Controller.HIT_DMG
             if not self.debug:
                 self.s1.led.set_led(comp=rm.led.COMP_ALL,
-                                    r={'red': 0, 'blue': 255}[self.color], g=0,
-                                    b={'red': 255, 'blue': 0}[self.color],
-                                    effect={'red': rm.led.EFFECT_OFF, 'blue': rm.led.EFFECT_FLASH}[self.color])
+                                    r=SUB_COLOR_RGB_LIST[self.color][0],
+                                    g=SUB_COLOR_RGB_LIST[self.color][1],
+                                    b=SUB_COLOR_RGB_LIST[self.color][2],
+                                    effect={
+                                        "red": rm.led.EFFECT_OFF,
+                                        "blue": rm.led.EFFECT_FLASH
+                                    }[self.color])
                 time.sleep(0.03)
                 self.s1.led.set_led(comp=rm.led.COMP_ALL,
-                                    r={'red': 255, 'blue': 0}[self.color], g=0,
-                                    b={'red': 0, 'blue': 255}[self.color], effect=rm.led.EFFECT_ON)
-        elif tag == 'burn':
+                                    r=COLOR_RGB_LIST[self.color][0],
+                                    g=COLOR_RGB_LIST[self.color][1],
+                                    b=COLOR_RGB_LIST[self.color][2], effect=rm.led.EFFECT_ON)
+        elif tag == "burn":
             burn_hp = max(self.heat - S1Controller.MAX_HEAT, S1Controller.MAX_BURN_DMG)
             self.hp -= burn_hp
 
@@ -146,9 +150,9 @@ class S1Controller(Controller):
         if not self.debug:
             self.s1.chassis.drive_speed(x=0, y=0, z=0, timeout=1)
             self.s1.led.set_led(comp=rm.led.COMP_ALL,
-                                r={'red': 0, 'blue': 255}[self.color],
-                                g=0,
-                                b={'red': 255, 'blue': 0}[self.color],
+                                r=SUB_COLOR_RGB_LIST[self.color][0],
+                                g=SUB_COLOR_RGB_LIST[self.color][1],
+                                b=SUB_COLOR_RGB_LIST[self.color][2],
                                 effect=rm.led.EFFECT_FLASH,
                                 freq=1)
             self.s1.camera.stop_video_stream()

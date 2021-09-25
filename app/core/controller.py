@@ -8,7 +8,7 @@ class Controller:
     def __init__(self):
         self.aim_method = DEFAULT_AIM_METHOD
         self.action_state = True
-        self.gimbal_action = ''
+        self.gimbal_action = ""
         self.hp = 0
         self.heat = 0
         self.bat = 0

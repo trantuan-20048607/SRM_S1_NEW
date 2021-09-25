@@ -5,7 +5,7 @@ import logging
 from app.constants import *
 from app.core.container import *
 
-if __name__ == '__main__':
+if __name__ == "__main__":
 
     parser = argparse.ArgumentParser()
     parser.add_argument("-d", "--debug", default=False, help="DEBUG MODE", action="store_true")
@@ -28,7 +28,7 @@ if __name__ == '__main__':
     assert color != ""
 
     logging.basicConfig(level={True: logging.DEBUG, False: logging.INFO}[args.debug],
-                        filename="logs/app.log", filemode='w',
+                        filename="logs/app.log", filemode="w",
                         format="%(asctime)s - %(pathname)s[line:%(lineno)d] - %(levelname)s: %(message)s")
 
     app = Container(color, args.debug, args.record)

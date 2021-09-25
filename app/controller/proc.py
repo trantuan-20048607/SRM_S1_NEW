@@ -15,11 +15,11 @@ def start(color: str, debug: bool, in_queue: mp.Queue, out_queue: mp.Queue, reco
     assert color in COLOR_LIST
 
     logging.basicConfig(level={True: logging.DEBUG, False: logging.INFO}[debug],
-                        filename="logs/controller.log", filemode='w',
+                        filename="logs/controller.log", filemode="w",
                         format="%(asctime)s - %(pathname)s[line:%(lineno)d] - %(levelname)s: %(message)s")
 
     if debug:
-        video_src = "assets/s1%s.avi" % {"red": "blue", "blue": "red"}[color]
+        video_src = "assets/s1%s.avi" % COLOR_ENEMY_LIST[color]
         read_video = cv.VideoCapture(video_src)
         video_fps = read_video.get(cv.CAP_PROP_FPS)
 
@@ -37,57 +37,56 @@ def start(color: str, debug: bool, in_queue: mp.Queue, out_queue: mp.Queue, reco
         window_queue.put(Msg2Window(img=cv.transpose(cv.imread("assets/ERR.jpg")), err=True))
 
     while True:
-        time_start = time.time()
+        try:
+            time_start = time.time()
 
-        if debug:
-            ret, img = read_video.read()
+            if debug:
+                ret, img = read_video.read()
 
-            if not record:
-                time.sleep(0.05 / video_fps)
+                if not record:
+                    time.sleep(DEBUG_VIDEO_WAIT_TIME)
 
-            if not ret:
-                logging.debug("VIDEO ENDED")
-                terminate_window(out_queue)
-                break
+                if not ret:
+                    logging.debug("VIDEO ENDED")
+                    terminate_window(out_queue)
+                    break
 
-        else:
-            img = s1.get_img()
+            else:
+                img = s1.get_img()
 
-        if not debug:
-            s1.hit()
+            if not debug:
+                s1.hit()
 
-        if not in_queue.empty():
-            msg: Msg2Controller = in_queue.get()
+            if not in_queue.empty():
+                msg: Msg2Controller = in_queue.get()
 
-            try:
                 s1.act(img, msg)
 
-            except Exception as e:
-                logging.error(e)
+                if msg.terminate or s1.hp == 0:
+                    terminate_window(out_queue)
+                    break
 
-                report_error(out_queue)
-                break
+            s1.cool()
 
-            if msg.terminate or s1.hp == 0:
-                terminate_window(out_queue)
-                break
+            if not out_queue.full():
 
-        s1.cool()
+                if out_queue.empty() or not limit:
+                    if debug:
+                        img = cv.transpose(img)
 
-        if not out_queue.full():
+                        out_queue.put(
+                            Msg2Window(img=img, hp=s1.hp, heat=s1.heat, bat=s1.bat,
+                                       aim_method=s1.aim_method, target=s1.target))
 
-            if out_queue.empty() or not limit:
-                if debug:
-                    img = cv.transpose(img)
+            else:
+                logging.warning("UI MSG QUEUE FULL")
 
-                    out_queue.put(
-                        Msg2Window(img=img, hp=s1.hp, heat=s1.heat, bat=s1.bat,
-                                   aim_method=s1.aim_method, target=s1.target))
+            if not limit:
+                logging.debug(f"FPS {1 / (time.time() - time_start)}")
 
-        else:
-            logging.warning("UI MSG QUEUE FULL")
+            limit = out_queue.qsize() > QUEUE_BLOCK_THRESH
+        except Exception as e:
+            logging.error(e)
 
-        if not limit:
-            logging.debug(f"FPS {1 / (time.time() - time_start)}")
-
-        limit = out_queue.qsize() > QUEUE_BLOCK_THRESH
+            report_error(out_queue)
+            break

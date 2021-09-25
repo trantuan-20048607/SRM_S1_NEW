@@ -12,7 +12,7 @@ def timer(method):
         time_start = time()
         result = method(*args, **kwargs)
         time_end = time()
-        logging.debug('FUNC: %r TOOK: %2.4f sec' % (method.__name__, time_end - time_start))
+        logging.debug("FUNC: %r COST: %2.4f sec" % (method.__name__, time_end - time_start))
         return result
 
     return wrap

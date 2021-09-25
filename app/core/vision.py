@@ -2,7 +2,6 @@
 import itertools
 
 import cv2 as cv
-import numpy as np
 
 from app.constants import *
 
@@ -21,18 +20,47 @@ _kalman.processNoiseCov = np.array([[1, 0, 0, 0],
                                     [0, 0, 0, 1]], np.float32) * KALMAN_SHAKE_CONTROL
 _kalman.measurementNoiseCov = np.array([[1, 0],
                                         [0, 1]], np.float32) * KALMAN_DELAY_CONTROL
-_last_pre = _current_pre = np.array([[0],
-                                     [0]], np.float32)
-_last_mes = _current_mes = np.array([[0],
-                                     [0]], np.float32)
 
-_d_t = (SCREEN_SIZE[0] * 0.5, SCREEN_SIZE[1] * 0.5)
-_d2_t = (SCREEN_SIZE[0] * 0.5, SCREEN_SIZE[1] * 0.5)
+_last_pre = _current_pre = _last_mes = _current_mes = np.array([[SCREEN_SIZE[0] * 0.5],
+                                                                [SCREEN_SIZE[1] * 0.5]], np.float32)
 
-_direct_target_data = (SCREEN_SIZE[0] * 0.5, SCREEN_SIZE[1] * 0.5)
-_direct_data_cache = (SCREEN_SIZE[0] * 0.5, SCREEN_SIZE[1] * 0.5)
+_direct_target_data = _direct_data_cache = (SCREEN_SIZE[0] * 0.5, SCREEN_SIZE[1] * 0.5)
+
+_d_t = _d2_t = (SCREEN_SIZE[0] * 0.5, SCREEN_SIZE[1] * 0.5)
 
 _roi_enabled = False
+_current_tag = DEFAULT_AIM_METHOD
+
+
+def _kalman_reset():
+    global _kalman, _last_pre, _last_mes, _current_pre, _current_mes
+    _kalman = cv.KalmanFilter(4, 2)
+    _kalman.measurementMatrix = np.array([[1, 0, 0, 0],
+                                          [0, 1, 0, 0]], np.float32)
+    _kalman.transitionMatrix = np.array([[1, 0, 1, 0],
+                                         [0, 1, 0, 1],
+                                         [0, 0, 1, 0],
+                                         [0, 0, 0, 1]], np.float32)
+    _kalman.processNoiseCov = np.array([[1, 0, 0, 0],
+                                        [0, 1, 0, 0],
+                                        [0, 0, 1, 0],
+                                        [0, 0, 0, 1]], np.float32) * KALMAN_SHAKE_CONTROL
+    _kalman.measurementNoiseCov = np.array([[1, 0],
+                                            [0, 1]], np.float32) * KALMAN_DELAY_CONTROL
+    _current_mes = _current_pre = _last_mes = _last_pre = np.array([[SCREEN_SIZE[0] * 0.5],
+                                                                    [SCREEN_SIZE[1] * 0.5]], np.float32)
+
+
+def _tri_reset():
+    global _d_t, _d2_t
+    _d_t = _d2_t = (SCREEN_SIZE[0] * 0.5, SCREEN_SIZE[1] * 0.5)
+
+
+def _reset():
+    global _roi_enabled
+    _roi_enabled = False
+    _kalman_reset()
+    _tri_reset()
 
 
 def _roi_cut_img(img: np.array, center: tuple, size: tuple):
@@ -40,50 +68,55 @@ def _roi_cut_img(img: np.array, center: tuple, size: tuple):
            max(int(center[0] - size[0] / 2), 0):min(int(center[0] + size[0] / 2), SCREEN_SIZE[0])]
 
 
-def _ident_tgt(img: np.array, debug: bool, color: str) -> tuple or None:
+def _ident_tgt(img: np.array, color: str) -> tuple or None:
     assert color in COLOR_LIST
 
     img_hsv = cv.cvtColor(img, cv.COLOR_BGR2HSV)
-    if color == "red":
-        img_color = cv.bitwise_and(
-            img, img, mask=cv.inRange(
-                img_hsv, np.array([90, 112, 102]), np.array([100, 255, 255])))
-    elif color == "blue":
-        img_color = cv.add(
-            cv.bitwise_and(
+    img_color = np.zeros(img.shape, dtype=np.uint8)
+
+    if color in HSV_RANGE and type(HSV_RANGE[color]) in (list, tuple):
+        if type(HSV_RANGE[color]) == tuple:
+            img_color = cv.bitwise_and(
                 img, img, mask=cv.inRange(
-                    img_hsv, np.array([176, 112, 102]), np.array([180, 255, 255]))),
-            cv.bitwise_and(
-                img, img, mask=cv.inRange(
-                    img_hsv, np.array([0, 112, 102]), np.array([8, 255, 255]))))
+                    img_hsv, HSV_RANGE[color][0], HSV_RANGE[color][1]))
+        else:
+            for lower, upper in HSV_RANGE[color]:
+                img_color = cv.add(img_color, cv.bitwise_and(
+                    img, img, mask=cv.inRange(img_hsv, lower, upper)))
     else:
         img_color = img_hsv
 
     cv.medianBlur(img_color, 3, img_color)
-    _, binary = cv.threshold(cv.cvtColor(img_color, cv.COLOR_BGR2GRAY), 16, 255, cv.THRESH_BINARY)
+    _, binary = cv.threshold(cv.cvtColor(img_color, cv.COLOR_BGR2GRAY), GRAY_THRESH, 255, cv.THRESH_BINARY)
     contours, _ = cv.findContours(binary, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE)
 
-    center, weight = [0, 0], 0.0
+    center_x, center_y, weight = 0.0, 0.0, 0.0
     if contours:
         for i, contour in enumerate(contours):
             x, y, w, h = cv.boundingRect(contour)
             a = w * h
-            if a > 16:
+            if a > MIN_RECT_AREA:
                 weight += a
-                center[0] += x * a
-                center[1] += y * a
-    if weight > 18:
-        return center[0] / weight, center[1] / weight
+                center_x += x * a
+                center_y += y * a
+    if weight > MIN_VALID_TOTAL_AREA:
+        return center_x / weight, center_y / weight
     else:
         return None
 
 
-def _smooth(data: tuple, debug: bool):
-    _update_triangular_feedback(data, debug)
-    _update_kalman(data, debug)
+def _smooth(data: tuple, tag: str):
+    assert tag in AUTO_AIM_METHOD_LIST
+
+    if tag == "kalman":
+        _update_kalman(data)
+    elif tag == "tri":
+        _update_triangular_feedback(data)
 
 
-def _get_target_position(tag: str, debug: bool):
+def _get_target_position(tag: str):
+    assert tag in AUTO_AIM_METHOD_LIST
+
     global _direct_data_cache
     if tag == "kalman":
         return int(_current_pre[0][0]), int(_current_pre[1][0])
@@ -104,23 +137,22 @@ def _triangular_weight(max_len: int or float):
     return TRIANGULAR_DIFFERENCE_WEIGHT[-1]
 
 
-def _update_triangular_feedback(data: tuple, debug: bool):
+def _update_triangular_feedback(data: tuple):
     global _d_t, _d2_t
     points = (np.array(data), np.array(_d_t), np.array(_d2_t))
     sides = tuple(x - y for x, y in itertools.combinations(points, 2))
     side_len = tuple(np.linalg.norm(s) for s in sides)
     weight = _triangular_weight(max(side_len))
-    g_center = weight[0] * points[0] + \
-               weight[1] * points[1] + \
-               weight[2] * points[2]
+    g_center_x, g_center_y = weight[0] * points[0] + \
+                             weight[1] * points[1] + \
+                             weight[2] * points[2]
 
     weight = weight[0] + weight[1] + weight[2]
     _d2_t = _d_t
-    _d_t = (g_center[0] / weight, g_center[1] / weight)
-    return
+    _d_t = (g_center_x / weight, g_center_y / weight)
 
 
-def _update_kalman(data: tuple, debug: bool):
+def _update_kalman(data: tuple):
     global _last_pre, _current_pre, _last_mes, _current_mes
     _last_pre = _current_pre
     _last_mes = _current_mes
@@ -129,26 +161,32 @@ def _update_kalman(data: tuple, debug: bool):
     _current_pre = _kalman.predict()
 
 
-def feed(img: np.array, debug: bool, color: str, tag: str = AIM_METHOD_SELECT_LIST[DEFAULT_AIM_METHOD]):
+def feed(img: np.array, color: str, tag: str = AIM_METHOD_SELECT_LIST[DEFAULT_AIM_METHOD]):
     assert tag in AUTO_AIM_METHOD_LIST
     assert color in COLOR_LIST
 
-    global _roi_enabled, _last_pre, _last_mes, _current_pre, _current_mes, _direct_target_data
+    global _roi_enabled, _last_pre, _last_mes, _current_pre, _current_mes, _direct_target_data, _current_tag
+
+    if tag != _current_tag:
+        _reset()
+        _current_tag = tag
+
     if not _roi_enabled:
-        _direct_target_data = _ident_tgt(img, debug, color)
+        _direct_target_data = _ident_tgt(img, color)
         if _direct_target_data:
             _roi_enabled = True
-            _smooth(_direct_target_data, debug)
-            return _get_target_position(tag, debug)
+            _smooth(_direct_target_data, tag)
+            return _get_target_position(tag)
         else:
-            return _get_target_position(tag, debug)
+            return _get_target_position(tag)
     else:
-        _direct_target_data = _ident_tgt(_roi_cut_img(img, (_last_pre[0][0], _last_pre[1][0]), ROI_SIZE), debug, color)
+        last_x, last_y = _get_target_position(tag)
+        _direct_target_data = _ident_tgt(_roi_cut_img(img, (last_x, last_y), ROI_SIZE), color)
         if _direct_target_data:
-            _direct_target_data = (_direct_target_data[0] - ROI_SIZE[0] * 0.5 + _last_pre[0][0],
-                                   _direct_target_data[1] - ROI_SIZE[1] * 0.5 + _last_pre[1][0])
-            _smooth(_direct_target_data, debug)
-            return _get_target_position(tag, debug)
+            _direct_target_data = (_direct_target_data[0] - ROI_SIZE[0] * 0.5 + last_x,
+                                   _direct_target_data[1] - ROI_SIZE[1] * 0.5 + last_y)
+            _smooth(_direct_target_data, tag)
+            return _get_target_position(tag)
         else:
             _roi_enabled = False
-            return _get_target_position(tag, debug)
+            return _get_target_position(tag)

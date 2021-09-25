@@ -1,7 +1,9 @@
 # -*- coding: utf-8 -*-
 
+import numpy as np
+
 # --------------------
-#   ⚪ 基础、界面设置 ⚪
+#     ⚪ 基础设置 ⚪
 # --------------------
 
 # 屏幕大小
@@ -10,8 +12,29 @@ SCREEN_SIZE = (1280, 720)
 # 程序支持的颜色
 COLOR_LIST = ("red", "blue")
 
+# 敌人的颜色对应关系
+COLOR_ENEMY_LIST = {
+    "red": "blue",
+    "blue": "red"
+}
+
+# 颜色定义
+COLOR_RGB_LIST = {
+    "red": (255, 0, 0),
+    "blue": (0, 0, 255)
+}
+
+# 副颜色定义
+SUB_COLOR_RGB_LIST = {
+    "red": COLOR_RGB_LIST["blue"],
+    "blue": COLOR_RGB_LIST["red"]
+}
+
 # 录制视频帧率
 RECORDING_FPS = 30
+
+# 调试模式下，控制器发送消息的间隔时间
+DEBUG_VIDEO_WAIT_TIME = 0.001
 
 # 默认瞄准方式
 DEFAULT_AIM_METHOD = "manual"
@@ -23,7 +46,27 @@ QUEUE_BLOCK_THRESH = 2
 FIRE_UI_SHOW_TIME = 10
 
 # --------------------
-#     ⚪ 瞄准设置 ⚪
+#    ⚪ 瞄准参数设置 ⚪
+# --------------------
+
+# 色彩提取范围定义
+HSV_RANGE = {
+    "red": [(np.array([176, 112, 102]), np.array([180, 255, 255])),
+            (np.array([0, 112, 102]), np.array([8, 255, 255]))],
+    "blue": (np.array([90, 112, 102]), np.array([100, 255, 255]))
+}
+
+# 参与识别的最小矩形面积
+MIN_RECT_AREA = 16
+
+# 判定识别有效所需的面积总和
+MIN_VALID_TOTAL_AREA = 18
+
+# 灰度门限
+GRAY_THRESH = 16
+
+# --------------------
+#    ⚪ 瞄准平滑设置 ⚪
 # --------------------
 
 # ROI 裁剪区域大小
