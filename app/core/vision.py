@@ -8,19 +8,6 @@ from app.constants import *
 __all__ = ["feed"]
 
 _kalman = cv.KalmanFilter(4, 2)
-_kalman.measurementMatrix = np.array([[1, 0, 0, 0],
-                                      [0, 1, 0, 0]], np.float32)
-_kalman.transitionMatrix = np.array([[1, 0, 1, 0],
-                                     [0, 1, 0, 1],
-                                     [0, 0, 1, 0],
-                                     [0, 0, 0, 1]], np.float32)
-_kalman.processNoiseCov = np.array([[1, 0, 0, 0],
-                                    [0, 1, 0, 0],
-                                    [0, 0, 1, 0],
-                                    [0, 0, 0, 1]], np.float32) * KALMAN_SHAKE_CONTROL
-_kalman.measurementNoiseCov = np.array([[1, 0],
-                                        [0, 1]], np.float32) * KALMAN_DELAY_CONTROL
-
 _last_pre = _current_pre = _last_mes = _current_mes = np.array([[SCREEN_SIZE[0] * 0.5],
                                                                 [SCREEN_SIZE[1] * 0.5]], np.float32)
 
@@ -143,9 +130,7 @@ def _update_triangular_feedback(data: tuple):
     sides = tuple(x - y for x, y in itertools.combinations(points, 2))
     side_len = tuple(np.linalg.norm(s) for s in sides)
     weight = _triangular_weight(max(side_len))
-    g_center_x, g_center_y = weight[0] * points[0] + \
-                             weight[1] * points[1] + \
-                             weight[2] * points[2]
+    g_center_x, g_center_y = weight[0] * points[0] + weight[1] * points[1] + weight[2] * points[2]
 
     weight = weight[0] + weight[1] + weight[2]
     _d2_t = _d_t
