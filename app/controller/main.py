@@ -42,7 +42,7 @@ class S1Controller(Controller):
         if not debug:
             self.s1 = robot.Robot()
             self.s1.initialize(conn_type="ap", proto_type="udp")
-            # logging.info(self.s1.set_robot_mode(mode=robot.GIMBAL_LEAD))
+            self.s1.set_robot_mode(mode=robot.GIMBAL_LEAD)
             self.s1.led.set_led(comp=led.COMP_ALL,
                                 r=COLOR_RGB_LIST[color][0],
                                 g=COLOR_RGB_LIST[color][1],
@@ -52,6 +52,7 @@ class S1Controller(Controller):
             self.s1.battery.sub_battery_info(freq=5, callback=self.battery_callback)
             self.s1.gimbal.sub_angle(callback=self.angle_callback)
             self.s1.armor.set_hit_sensitivity(sensitivity=10)
+            self.gimbal_action = None
 
         logging.debug(self)
 
@@ -78,6 +79,7 @@ class S1Controller(Controller):
 
         if self.aim_method != "manual":
             self.target = vision.feed(img, color=COLOR_ENEMY_LIST[self.color], tag=self.aim_method)
+
             yaw = (self.target[0] - int(SCREEN_SIZE[0] / 2)) / SCREEN_SIZE[0] * 125
             pitch = (int(SCREEN_SIZE[1] / 2) - self.target[1]) / SCREEN_SIZE[1] * 20
 
@@ -90,14 +92,14 @@ class S1Controller(Controller):
         logging.info(f"ROT Y{yaw} P{pitch}")
 
         if not self.debug:
-            if self.action_state:
-                if 50 > abs(yaw) >= 3 or 10 > abs(pitch) > 3:
-                    self.gimbal_action = self.s1.gimbal.move(yaw=yaw, pitch=pitch,
-                                                             pitch_speed=S1Controller.GIMBAL_SPEED_PITCH,
-                                                             yaw_speed=S1Controller.GIMBAL_SPEED_YAW)
-                    self.action_state = self.gimbal_action.is_completed
-            else:
+            if self.gimbal_action:
                 self.action_state = self.gimbal_action.is_completed
+
+            if self.action_state and (
+                    50 > abs(yaw) >= AIMING_DEAD_ZONE[0] or 10 > abs(pitch) > AIMING_DEAD_ZONE[1]):
+                self.gimbal_action = self.s1.gimbal.move(yaw=yaw, pitch=pitch,
+                                                         pitch_speed=S1Controller.GIMBAL_SPEED_PITCH,
+                                                         yaw_speed=S1Controller.GIMBAL_SPEED_YAW)
 
         if msg.fire:
             if not self.debug:
@@ -105,6 +107,7 @@ class S1Controller(Controller):
                 self.s1.blaster.fire(blaster.INFRARED_FIRE, 1)
 
             self.heat += S1Controller.FIRE_HEAT
+
             if self.heat > S1Controller.MAX_HEAT:
                 self.__bleed(tag="burn")
 
@@ -114,6 +117,7 @@ class S1Controller(Controller):
         if self.hit_times > self.last_hit_times:
             for _ in range(self.last_hit_times, self.hit_times):
                 self.__bleed(tag="hit")
+
             self.last_hit_times = self.hit_times
 
     def cool(self):
@@ -131,10 +135,7 @@ class S1Controller(Controller):
                                     r=SUB_COLOR_RGB_LIST[self.color][0],
                                     g=SUB_COLOR_RGB_LIST[self.color][1],
                                     b=SUB_COLOR_RGB_LIST[self.color][2],
-                                    effect={
-                                        "red": led.EFFECT_OFF,
-                                        "blue": led.EFFECT_FLASH
-                                    }[self.color])
+                                    effect=HIT_EFFECT[self.color])
                 time.sleep(0.03)
                 self.s1.led.set_led(comp=led.COMP_ALL,
                                     r=COLOR_RGB_LIST[self.color][0],

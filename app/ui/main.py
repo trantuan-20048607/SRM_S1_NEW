@@ -116,6 +116,18 @@ class Window(object):
                 self.screen.blit(ft.render(f"BAT: {msg.bat}", True, (10, 255, 10)), (800, 80))
             pygame.display.flip()
 
+    def update_cur(self):
+        cur_delta = (0, 0)
+
+        if self.aim_method == "manual":
+            cur_current = pygame.mouse.get_pos()
+            if cur_current != (int(SCREEN_SIZE[0] / 2), int(SCREEN_SIZE[1] / 2)):
+                cur_delta = (cur_current[0] - int(SCREEN_SIZE[0] / 2),
+                             cur_current[1] - int(SCREEN_SIZE[1] / 2))
+                pygame.mouse.set_pos(int(SCREEN_SIZE[0] / 2), int(SCREEN_SIZE[1] / 2))
+
+        return cur_delta
+
     def feedback(self, out_queue: mp.Queue):
         for event in pygame.event.get():
             speed, aim_method = self.speed, self.aim_method
@@ -142,14 +154,7 @@ class Window(object):
                 if aim_method != self.aim_method:
                     self.aim_method = aim_method
 
-                if self.aim_method == "manual":
-                    cur_current = pygame.mouse.get_pos()
-                    if cur_current != (int(SCREEN_SIZE[0] / 2), int(SCREEN_SIZE[1] / 2)):
-                        cur_delta = (cur_current[0] - int(SCREEN_SIZE[0] / 2),
-                                     cur_current[1] - int(SCREEN_SIZE[1] / 2))
-                        pygame.mouse.set_pos(int(SCREEN_SIZE[0] / 2), int(SCREEN_SIZE[1] / 2))
-
-                out_queue.put(Msg2Controller(speed=speed, cur_delta=cur_delta, aim_method=self.aim_method,
+                out_queue.put(Msg2Controller(speed=speed, cur_delta=self.update_cur(), aim_method=self.aim_method,
                                              fire=event.type == MOUSEBUTTONDOWN, terminate=term))
 
                 self.speed = speed
@@ -161,11 +166,4 @@ class Window(object):
             pygame.mouse.set_pos(int(SCREEN_SIZE[0] / 2), int(SCREEN_SIZE[1] / 2))
 
         if out_queue.empty():
-            cur_delta = (0, 0)
-            if self.aim_method == "manual":
-                cur_current = pygame.mouse.get_pos()
-                if cur_current != (int(SCREEN_SIZE[0] / 2), int(SCREEN_SIZE[1] / 2)):
-                    cur_delta = (cur_current[0] - int(SCREEN_SIZE[0] / 2),
-                                 cur_current[1] - int(SCREEN_SIZE[1] / 2))
-                    pygame.mouse.set_pos(int(SCREEN_SIZE[0] / 2), int(SCREEN_SIZE[1] / 2))
-            out_queue.put(Msg2Controller(speed=self.speed, cur_delta=cur_delta, aim_method=self.aim_method))
+            out_queue.put(Msg2Controller(speed=self.speed, cur_delta=self.update_cur(), aim_method=self.aim_method))

@@ -11,9 +11,9 @@ _kalman = cv.KalmanFilter(4, 2)
 _last_pre = _current_pre = _last_mes = _current_mes = np.array([[SCREEN_SIZE[0] * 0.5],
                                                                 [SCREEN_SIZE[1] * 0.5]], np.float32)
 
-_direct_target_data = _direct_data_cache = (SCREEN_SIZE[0] * 0.5, SCREEN_SIZE[1] * 0.5)
-
 _d_t = _d2_t = (SCREEN_SIZE[0] * 0.5, SCREEN_SIZE[1] * 0.5)
+
+_direct_target_data = _direct_data_cache = (SCREEN_SIZE[0] * 0.5, SCREEN_SIZE[1] * 0.5)
 
 _roi_enabled = False
 _current_tag = DEFAULT_AIM_METHOD
@@ -126,10 +126,12 @@ def _triangular_weight(max_len: int or float):
 
 def _update_triangular_feedback(data: tuple):
     global _d_t, _d2_t
+
     points = (np.array(data), np.array(_d_t), np.array(_d2_t))
     sides = tuple(x - y for x, y in itertools.combinations(points, 2))
     side_len = tuple(np.linalg.norm(s) for s in sides)
     weight = _triangular_weight(max(side_len))
+
     g_center_x, g_center_y = weight[0] * points[0] + weight[1] * points[1] + weight[2] * points[2]
 
     weight = weight[0] + weight[1] + weight[2]
@@ -141,7 +143,9 @@ def _update_kalman(data: tuple):
     global _last_pre, _current_pre, _last_mes, _current_mes
     _last_pre = _current_pre
     _last_mes = _current_mes
+
     _current_mes = np.array([[data[0]], [data[1]]], np.float32)
+
     _kalman.correct(_current_mes)
     _current_pre = _kalman.predict()
 
@@ -158,20 +162,30 @@ def feed(img: np.array, color: str, tag: str = AIM_METHOD_SELECT_LIST[DEFAULT_AI
 
     if not _roi_enabled:
         _direct_target_data = _ident_tgt(img, color)
+
         if _direct_target_data:
             _roi_enabled = True
+
             _smooth(_direct_target_data, tag)
+
             return _get_target_position(tag)
+
         else:
             return _get_target_position(tag)
     else:
         last_x, last_y = _get_target_position(tag)
+
         _direct_target_data = _ident_tgt(_roi_cut_img(img, (last_x, last_y), ROI_SIZE), color)
+
         if _direct_target_data:
             _direct_target_data = (_direct_target_data[0] - ROI_SIZE[0] * 0.5 + last_x,
                                    _direct_target_data[1] - ROI_SIZE[1] * 0.5 + last_y)
+
             _smooth(_direct_target_data, tag)
+
             return _get_target_position(tag)
+
         else:
             _roi_enabled = False
+
             return _get_target_position(tag)

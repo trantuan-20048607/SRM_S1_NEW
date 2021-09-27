@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import numpy as np
+from robomaster import *
 
 # --------------------
 #     ⚪ 基础设置 ⚪
@@ -28,6 +29,15 @@ COLOR_RGB_LIST = {
 SUB_COLOR_RGB_LIST = {
     "red": COLOR_RGB_LIST["blue"],
     "blue": COLOR_RGB_LIST["red"]
+}
+
+# 瞄准死区
+AIMING_DEAD_ZONE = (0.1, 0.1)
+
+# 击打特效定义
+HIT_EFFECT = {
+    "red": led.EFFECT_OFF,
+    "blue": led.EFFECT_FLASH
 }
 
 # 录制视频帧率
