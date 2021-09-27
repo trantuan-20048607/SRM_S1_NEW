@@ -32,7 +32,6 @@ class Window(object):
         self.screen = pygame.display.set_mode(SCREEN_SIZE, flags=pygame.DOUBLEBUF)
         self.speed = (0, 0)
         self.fire_show_delay = 0
-        self.ctr_error = False
         self.aim_method = DEFAULT_AIM_METHOD
 
         logging.debug(self)
@@ -49,7 +48,6 @@ class Window(object):
                 "assets/DX_BOLD.ttf", 50).render(
                 "程序将自动退出", True, (160, 20, 10)),
                 (int((SCREEN_SIZE[0] - 350) / 2), int(SCREEN_SIZE[1] / 2)))
-            self.ctr_error = True
 
         else:
             ft = pygame.font.Font("assets/DX_BOLD.ttf", 30)
