@@ -62,7 +62,7 @@ def start(color: str, debug: bool, in_queue: mp.Queue, out_queue: mp.Queue, reco
 
                 s1.act(img, msg)
 
-                if msg.terminate or s1.hp == 0:
+                if s1.hp == 0:
                     terminate_window(out_queue)
                     break
 
@@ -74,9 +74,9 @@ def start(color: str, debug: bool, in_queue: mp.Queue, out_queue: mp.Queue, reco
                     if debug:
                         img = cv.transpose(img)
 
-                        out_queue.put(
-                            Msg2Window(img=img, hp=s1.hp, heat=s1.heat, bat=s1.bat,
-                                       aim_method=s1.aim_method, target=s1.target))
+                    out_queue.put(
+                        Msg2Window(img=img, hp=s1.hp, heat=s1.heat, bat=s1.bat,
+                                   aim_method=s1.aim_method, target=s1.target))
 
             else:
                 logging.warning("UI MSG QUEUE FULL")
