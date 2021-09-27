@@ -25,7 +25,7 @@ class Window(object):
         pygame.event.set_allowed([MOUSEBUTTONDOWN, KEYUP, KEYDOWN])
         pygame.event.set_blocked(MOUSEMOTION)
         pygame.display.set_caption("SRM 校内赛")
-        pygame.mouse.set_visible(debug)
+        pygame.mouse.set_visible(True)
         pygame.event.set_grab(True)
 
         self.debug = debug

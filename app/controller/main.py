@@ -42,7 +42,7 @@ class S1Controller(Controller):
         if not debug:
             self.s1 = robot.Robot()
             self.s1.initialize(conn_type="ap", proto_type="udp")
-            logging.debug(self.s1.set_robot_mode(mode=robot.GIMBAL_LEAD))
+            # logging.info(self.s1.set_robot_mode(mode=robot.GIMBAL_LEAD))
             self.s1.led.set_led(comp=led.COMP_ALL,
                                 r=COLOR_RGB_LIST[color][0],
                                 g=COLOR_RGB_LIST[color][1],
