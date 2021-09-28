@@ -95,14 +95,10 @@ def _ident_tgt(img: np.array, color: str) -> tuple or None:
 def _smooth(data: tuple, tag: str):
     assert tag in AUTO_AIM_METHOD_LIST
 
-    _update_kalman(data)
-    _update_triangular_feedback(data)
-    """
     if tag == "kalman":
         _update_kalman(data)
     elif tag == "tri":
         _update_triangular_feedback(data)
-    """
 
 
 def _get_target_position(tag: str):
@@ -161,7 +157,7 @@ def feed(img: np.array, color: str, tag: str = AIM_METHOD_SELECT_LIST[DEFAULT_AI
     global _roi_enabled, _last_pre, _last_mes, _current_pre, _current_mes, _direct_target_data, _current_tag
 
     if tag != _current_tag:
-        # _reset()
+        _reset()
         _current_tag = tag
 
     if not _roi_enabled:

@@ -25,7 +25,7 @@ class Window(object):
         pygame.event.set_allowed([MOUSEBUTTONDOWN, KEYUP, KEYDOWN])
         pygame.event.set_blocked(MOUSEMOTION)
         pygame.display.set_caption("SRM 校内赛")
-        pygame.mouse.set_visible(True)
+        pygame.mouse.set_visible(debug)
         pygame.event.set_grab(True)
 
         self.debug = debug
@@ -111,10 +111,10 @@ class Window(object):
                 ), (msg.target[0] - 60, msg.target[1] - 60))
 
             if not self.debug:
-                self.screen.blit(ft.render(f"BAT: {msg.bat}", True, (10, 255, 10)), (800, 80))
+                self.screen.blit(ft.render(f"BAT: {msg.bat}", True, (10, 255, 10)), (200, 50))
             pygame.display.flip()
 
-    def update_cur(self):
+    def _update_cur(self):
         cur_delta = (0, 0)
 
         if self.aim_method == "manual":
@@ -123,13 +123,15 @@ class Window(object):
                 cur_delta = (cur_current[0] - int(SCREEN_SIZE[0] / 2),
                              cur_current[1] - int(SCREEN_SIZE[1] / 2))
                 pygame.mouse.set_pos(int(SCREEN_SIZE[0] / 2), int(SCREEN_SIZE[1] / 2))
+        else:
+            pygame.mouse.set_pos(int(SCREEN_SIZE[0] / 2), int(SCREEN_SIZE[1] / 2))
 
         return cur_delta
 
     def feedback(self, out_queue: mp.Queue):
         for event in pygame.event.get():
             speed, aim_method = self.speed, self.aim_method
-            term, cur_delta = event.type == QUIT, (0, 0)
+            terminate, cur_delta = event.type == QUIT, (0, 0)
 
             if event.type == KEYDOWN and event.key in Window.SPEED_MAP:
                 speed = (speed[0] + Window.SPEED_MAP[event.key][0], speed[1] + Window.SPEED_MAP[event.key][1])
@@ -137,7 +139,7 @@ class Window(object):
             elif event.type == KEYDOWN:
 
                 if event.key == K_ESCAPE:
-                    term = True
+                    terminate = True
 
                 elif event.key in (K_q, K_e):
                     aim_method = {K_q: AIM_METHOD_SELECT_LIST[self.aim_method], K_e: "manual"}[event.key]
@@ -149,19 +151,15 @@ class Window(object):
                 if event.type == MOUSEBUTTONDOWN:
                     self.fire_show_delay = FIRE_UI_SHOW_TIME
 
-                if aim_method != self.aim_method:
-                    self.aim_method = aim_method
+                self.aim_method = aim_method
 
-                out_queue.put(Msg2Controller(speed=speed, cur_delta=self.update_cur(), aim_method=self.aim_method,
-                                             fire=event.type == MOUSEBUTTONDOWN, terminate=term))
+                out_queue.put(Msg2Controller(speed=speed, cur_delta=self._update_cur(), aim_method=self.aim_method,
+                                             fire=event.type == MOUSEBUTTONDOWN, terminate=terminate))
 
                 self.speed = speed
 
             else:
                 logging.warning("CTR MSG QUEUE FULL")
 
-        if self.aim_method != "manual":
-            pygame.mouse.set_pos(int(SCREEN_SIZE[0] / 2), int(SCREEN_SIZE[1] / 2))
-
         if out_queue.empty():
-            out_queue.put(Msg2Controller(speed=self.speed, cur_delta=self.update_cur(), aim_method=self.aim_method))
+            out_queue.put(Msg2Controller(speed=self.speed, cur_delta=self._update_cur(), aim_method=self.aim_method))

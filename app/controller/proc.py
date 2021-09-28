@@ -82,7 +82,7 @@ def start(color: str, debug: bool, in_queue: mp.Queue, out_queue: mp.Queue, reco
                 logging.warning("UI MSG QUEUE FULL")
 
             if not limit:
-                logging.debug(f"FPS {1 / (time.time() - time_start)}")
+                logging.info(f"FPS {1 / (time.time() - time_start)}")
 
             limit = out_queue.qsize() > QUEUE_BLOCK_THRESH
         except Exception as e:
