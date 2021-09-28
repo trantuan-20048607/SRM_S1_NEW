@@ -80,18 +80,20 @@ class S1Controller(Controller):
         if self.aim_method != "manual":
             self.target = vision.feed(img, color=COLOR_ENEMY_LIST[self.color], tag=self.aim_method)
 
-            yaw = (self.target[0] - int(SCREEN_SIZE[0] / 2)) / SCREEN_SIZE[0] * 125
-            pitch = (int(SCREEN_SIZE[1] / 2) - self.target[1]) / SCREEN_SIZE[1] * 20
+            yaw = (self.target[0] - int(SCREEN_SIZE[0] / 2)) / SCREEN_SIZE[0] * AUTO_AIM_MAGNIFICATION[0]
+            pitch = (int(SCREEN_SIZE[1] / 2) - self.target[1]) / SCREEN_SIZE[1] * AUTO_AIM_MAGNIFICATION[1]
 
             logging.debug(f"AUTO AIM {self.target[0]}, {self.target[1]}")
 
         else:
-            yaw = msg.cur_delta[0] / SCREEN_SIZE[0] * 120
-            pitch = - msg.cur_delta[1] / SCREEN_SIZE[1] * 20
+            yaw = msg.cur_delta[0] / SCREEN_SIZE[0] * AIMING_MAGNIFICATION[0]
+            pitch = - msg.cur_delta[1] / SCREEN_SIZE[1] * AIMING_MAGNIFICATION[1]
 
         logging.info(f"ROT Y{yaw} P{pitch}")
 
         if not self.debug:
+            if msg.speed[0] == 0 and msg.speed[1] == 0:
+                self.s1.set_robot_mode(mode=robot.GIMBAL_LEAD)
             if self.gimbal_action:
                 self.action_state = self.gimbal_action.is_completed
 

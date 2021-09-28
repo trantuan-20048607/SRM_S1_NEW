@@ -51,14 +51,14 @@ def start(color: str, debug: bool, in_queue: mp.Queue, out_queue: mp.Queue, reco
                 window.screen.subsurface(0, 0, SCREEN_SIZE[0], SCREEN_SIZE[1]), "RGB"))),
                                           cv.COLOR_RGB2BGR))
 
-        if msg.ctr_error:
+        if msg.err:
             time.sleep(5)
             break
 
         window.feedback(out_queue)
 
         if not using_cache:
-            logging.debug(f"FPS {1 / (time.time() - time_start)}")
+            logging.info(f"FPS {1 / (time.time() - time_start)}")
             logging.debug(f"I/O QUE SZ: {in_queue.qsize()}, {out_queue.qsize()}")
 
     if record:
