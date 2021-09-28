@@ -97,6 +97,11 @@ AIM_METHOD_SELECT_LIST = {"manual": "tri",
 # 自动瞄准方式列表
 AUTO_AIM_METHOD_LIST = ("kalman", "tri", "direct")
 
+# 各个自瞄方法的显示名称
+AUTO_AIM_METHOD_NAME = {"tri": "差分反馈",
+                        "kalman": "KALMAN",
+                        "direct": "原始数据"}
+
 # KALMAN 滤波器参数，详见 README
 KALMAN_SHAKE_CONTROL = 1e-3
 KALMAN_DELAY_CONTROL = 1e-1

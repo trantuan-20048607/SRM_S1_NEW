@@ -18,10 +18,7 @@ def start(color: str, debug: bool, in_queue: mp.Queue, out_queue: mp.Queue, reco
                         filename="logs/controller.log", filemode="w",
                         format="%(asctime)s - %(pathname)s[line:%(lineno)d] - %(levelname)s: %(message)s")
 
-    if debug:
-        video_src = "assets/s1%s.avi" % COLOR_ENEMY_LIST[color]
-        read_video = cv.VideoCapture(video_src)
-        video_fps = read_video.get(cv.CAP_PROP_FPS)
+    read_video = cv.VideoCapture("assets/s1%s.avi" % COLOR_ENEMY_LIST[color])
 
     s1 = S1Controller("S1", color, debug)
     limit = False
@@ -90,3 +87,5 @@ def start(color: str, debug: bool, in_queue: mp.Queue, out_queue: mp.Queue, reco
 
             report_error(out_queue)
             break
+
+    read_video.release()
