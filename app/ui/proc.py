@@ -27,36 +27,40 @@ def start(color: str, debug: bool, in_queue: mp.Queue, out_queue: mp.Queue, reco
     msg_cache = Msg2Window()
 
     while True:
-        time_start = time.time()
-        using_cache = in_queue.empty()
+        try:
+            time_start = time.time()
+            using_cache = in_queue.empty()
 
-        if not using_cache:
-            msg: Msg2Window = in_queue.get()
+            if not using_cache:
+                msg: Msg2Window = in_queue.get()
 
-            if msg.terminate:
+                if msg.terminate:
+                    break
+
+                msg_cache = msg
+
+            else:
+                msg = msg_cache
+
+            window.update(msg, in_queue.qsize(), out_queue.qsize(), record)
+
+            if record:
+                write_video.write(cv.cvtColor(np.asarray(Image.frombytes("RGB", SCREEN_SIZE, pygame.image.tostring(
+                    window.screen.subsurface(0, 0, SCREEN_SIZE[0], SCREEN_SIZE[1]), "RGB"))),
+                                              cv.COLOR_RGB2BGR))
+
+            if msg.err:
+                time.sleep(5)
                 break
 
-            msg_cache = msg
+            window.feedback(out_queue)
 
-        else:
-            msg = msg_cache
+            if not using_cache:
+                logging.info(f"FPS {1 / (time.time() - time_start)}")
+                logging.debug(f"I/O QUE SZ: {in_queue.qsize()}, {out_queue.qsize()}")
 
-        window.update(msg, in_queue.qsize(), out_queue.qsize(), record)
-
-        if record:
-            write_video.write(cv.cvtColor(np.asarray(Image.frombytes("RGB", SCREEN_SIZE, pygame.image.tostring(
-                window.screen.subsurface(0, 0, SCREEN_SIZE[0], SCREEN_SIZE[1]), "RGB"))),
-                                          cv.COLOR_RGB2BGR))
-
-        if msg.err:
-            time.sleep(5)
-            break
-
-        window.feedback(out_queue)
-
-        if not using_cache:
-            logging.info(f"FPS {1 / (time.time() - time_start)}")
-            logging.debug(f"I/O QUE SZ: {in_queue.qsize()}, {out_queue.qsize()}")
+        except Exception as e:
+            logging.error(e)
 
     if record:
         write_video.release()

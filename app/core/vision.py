@@ -161,8 +161,8 @@ def feed(img: np.array, color: str, tag: str = AIM_METHOD_SELECT_LIST[DEFAULT_AI
         _current_tag = tag
 
     last_x, last_y = _get_target_position(tag)
-    if last_x > SCREEN_SIZE[0] - 120 or last_y > SCREEN_SIZE[1] - 120 or \
-            last_x < 120 or last_y < 120:
+    if last_x > SCREEN_SIZE[0] - ROI_LIMIT or last_y > SCREEN_SIZE[1] - ROI_LIMIT or \
+            last_x < ROI_LIMIT or last_y < ROI_LIMIT:
         _roi_enabled = False
 
     if not _roi_enabled:

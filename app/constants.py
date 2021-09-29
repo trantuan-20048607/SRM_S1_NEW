@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import numpy as np
-from robomaster import *
+from robomaster import led
 
 # --------------------
 #     ⚪ 基础设置 ⚪
@@ -32,7 +32,7 @@ SUB_COLOR_RGB_LIST = {
 }
 
 # 瞄准死区
-AIMING_DEAD_ZONE = (0.01, 0.01)
+AIMING_DEAD_ZONE = (0, 0)
 
 # 瞄准速度
 AIMING_MAGNIFICATION = (180, 30)
@@ -76,10 +76,13 @@ HSV_RANGE = {
 MIN_RECT_AREA = 16
 
 # 判定识别有效所需的面积总和
-MIN_VALID_TOTAL_AREA = 18
+MIN_VALID_TOTAL_AREA = 64
 
 # 灰度门限
 GRAY_THRESH = 16
+
+# ROI 激活范围
+ROI_LIMIT = 128
 
 # --------------------
 #    ⚪ 瞄准平滑设置 ⚪
