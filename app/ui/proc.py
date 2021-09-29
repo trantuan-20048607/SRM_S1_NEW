@@ -36,9 +36,6 @@ def start(color: str, debug: bool, in_queue: mp.Queue, out_queue: mp.Queue, reco
             if msg.terminate:
                 break
 
-            if not debug:
-                msg.img = cv.transpose(msg.img)
-
             msg_cache = msg
 
         else:

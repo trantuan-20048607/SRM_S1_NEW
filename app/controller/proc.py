@@ -68,8 +68,7 @@ def start(color: str, debug: bool, in_queue: mp.Queue, out_queue: mp.Queue, reco
             if not out_queue.full():
 
                 if out_queue.empty() or not limit:
-                    if debug:
-                        img = cv.transpose(img)
+                    img = cv.transpose(img)
 
                     out_queue.put(
                         Msg2Window(img=img, hp=s1.hp, heat=s1.heat, bat=s1.bat,

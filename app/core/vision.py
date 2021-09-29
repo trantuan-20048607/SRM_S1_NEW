@@ -160,6 +160,11 @@ def feed(img: np.array, color: str, tag: str = AIM_METHOD_SELECT_LIST[DEFAULT_AI
         _reset()
         _current_tag = tag
 
+    last_x, last_y = _get_target_position(tag)
+    if last_x > SCREEN_SIZE[0] - 120 or last_y > SCREEN_SIZE[1] - 120 or \
+            last_x < 120 or last_y < 120:
+        _roi_enabled = False
+
     if not _roi_enabled:
         _direct_target_data = _ident_tgt(img, color)
 
@@ -173,8 +178,6 @@ def feed(img: np.array, color: str, tag: str = AIM_METHOD_SELECT_LIST[DEFAULT_AI
         else:
             return _get_target_position(tag)
     else:
-        last_x, last_y = _get_target_position(tag)
-
         _direct_target_data = _ident_tgt(_roi_cut_img(img, (last_x, last_y), ROI_SIZE), color)
 
         if _direct_target_data:
