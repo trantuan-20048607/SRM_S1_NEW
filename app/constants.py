@@ -32,7 +32,7 @@ SUB_COLOR_RGB_LIST = {
 }
 
 # 瞄准死区
-AIMING_DEAD_ZONE = (0.01, 0.01)
+AIMING_DEAD_ZONE = (0.1, 0.1)
 
 # 击打特效定义
 HIT_EFFECT = {
