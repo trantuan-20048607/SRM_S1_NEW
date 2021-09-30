@@ -110,7 +110,7 @@ class Window(object):
 
             if not self.debug:
                 self.screen.blit(ft.render(f"BAT: {msg.bat}", True, (10, 255, 10)), (300, 50))
-            pygame.display.flip()
+        pygame.display.flip()
 
     def _update_cur(self):
         cur_delta = (0, 0)
