@@ -89,9 +89,10 @@ SRM_S1_NEW
 │   │   ├───vision.py      # 图像处理函数
 │   │   └───controller.py  # 控制器基类
 │   ├───controller    # 控制器
+│   │   ├───const          # 机器人参数
+│   │   │   └───S1Robot        # RoboMaster S1
 │   │   ├───proc.py        # 控制器进程
 │   │   ├───main.py        # 功能实现
-│   │   ├───S1Robot.py     # S1 参数定义
 │   │   └───msg.py         # 消息封装
 │   ├───benchmark     # 性能测试
 │   │   ├───timer.py       # 简易计时器
