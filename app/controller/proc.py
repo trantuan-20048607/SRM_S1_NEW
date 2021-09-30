@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-import _thread
+import threading
 import logging
 import multiprocessing as mp
 import time
@@ -34,7 +34,8 @@ def start(color: str, debug: bool, in_queue: mp.Queue, out_queue: mp.Queue, reco
             _ = window_queue.get()
         window_queue.put(Msg2Window(img=cv.transpose(cv.imread("assets/ERR.jpg")), err=True))
 
-    _thread.start_new_thread(s1.auto_cool, ())
+    auto_cooling_thread = threading.Thread(target=s1.auto_cool, args=())
+    auto_cooling_thread.start()
 
     while True:
         try:

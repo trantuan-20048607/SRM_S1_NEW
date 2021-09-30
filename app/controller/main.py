@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import logging
 import time
+import threading
 
 from robomaster import *
 
@@ -28,6 +29,8 @@ class S1Controller(Controller):
         self.aim_method = DEFAULT_AIM_METHOD
 
         self.last_cool_time = time.time()
+        self.cool_time_lock = threading.Lock()
+
         self.hit_times = 0
         self.target = (int(SCREEN_SIZE[0] / 2), int(SCREEN_SIZE[1] / 2))
 
@@ -103,7 +106,14 @@ class S1Controller(Controller):
                 self.s1.blaster.set_led(200)
                 self.s1.blaster.fire(blaster.INFRARED_FIRE, 1)
 
+            self.cool_time_lock.acquire()
+
+            if self.heat == 0:
+                self.last_cool_time = time.time()
+
             self.heat += S1Robot.FIRE_HEAT
+
+            self.cool_time_lock.release()
 
             if self.heat > S1Robot.MAX_HEAT:
                 self.__bleed(tag="burn")
@@ -114,9 +124,10 @@ class S1Controller(Controller):
         while self.hp > 0:
             time.sleep(0.1)
             if 0.95 <= time.time() - self.last_cool_time <= 1.05:
+                self.cool_time_lock.acquire()
                 self.last_cool_time = time.time()
                 self.heat = max(self.heat - S1Robot.COOL_HEAT, 0)
-
+                self.cool_time_lock.release()
                 logging.info("COOLING DOWN")
 
     def __bleed(self, tag: str):
