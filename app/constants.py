@@ -32,13 +32,7 @@ SUB_COLOR_RGB_LIST = {
 }
 
 # 瞄准死区
-AIMING_DEAD_ZONE = (0, 0)
-
-# 瞄准速度
-AIMING_MAGNIFICATION = (180, 30)
-
-# 自动瞄准灵敏度
-AUTO_AIM_MAGNIFICATION = (90, 15)
+AIMING_DEAD_ZONE = (0.01, 0.01)
 
 # 击打特效定义
 HIT_EFFECT = {
@@ -62,8 +56,21 @@ QUEUE_BLOCK_THRESH = 2
 FIRE_UI_SHOW_TIME = 10
 
 # --------------------
-#    ⚪ 瞄准参数设置 ⚪
+#    ⚪ 手动瞄准设置 ⚪
 # --------------------
+
+# 手动瞄准灵敏度
+AIMING_MAGNIFICATION = (180, 30)
+
+# 反转 Y 轴
+REVERSE_Y_AXIS = False
+
+# --------------------
+#    ⚪ 自瞄参数设置 ⚪
+# --------------------
+
+# 自动瞄准灵敏度
+AUTO_AIM_MAGNIFICATION = (90, 15)
 
 # 色彩提取范围定义
 HSV_RANGE = {
@@ -85,7 +92,7 @@ GRAY_THRESH = 16
 ROI_LIMIT = 128
 
 # --------------------
-#    ⚪ 瞄准平滑设置 ⚪
+#    ⚪ 自瞄平滑设置 ⚪
 # --------------------
 
 # ROI 裁剪区域大小

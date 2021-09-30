@@ -5,6 +5,7 @@ import time
 from robomaster import *
 
 from app.constants import *
+from app.controller.const import S1Robot
 from app.controller.msg import *
 from app.core import vision
 from app.core.controller import *
@@ -13,15 +14,6 @@ __all__ = ["S1Controller"]
 
 
 class S1Controller(Controller):
-    MAX_HEAT = 150
-    HIT_DMG = 15
-    FIRE_HEAT = 25
-    COOL_HEAT = 15
-    MAX_BURN_DMG = 35
-    INITIAL_HP = 600
-    INITIAL_BAT = 100
-    GIMBAL_SPEED_YAW = 100
-    GIMBAL_SPEED_PITCH = 100
 
     def __init__(self, name: str, color: str, debug: bool):
         super(S1Controller, self).__init__()
@@ -31,12 +23,12 @@ class S1Controller(Controller):
         self.name = name
         self.color = color
         self.debug = debug
-        self.hp = S1Controller.INITIAL_HP
-        self.bat = S1Controller.INITIAL_BAT
+        self.hp = S1Robot.INITIAL_HP
+        self.bat = S1Robot.INITIAL_BAT
         self.aim_method = DEFAULT_AIM_METHOD
 
         self.last_cool_time = time.time()
-        self.hit_times, self.last_hit_times = 0, 0
+        self.hit_times = 0
         self.target = (int(SCREEN_SIZE[0] / 2), int(SCREEN_SIZE[1] / 2))
 
         if not debug:
@@ -88,11 +80,14 @@ class S1Controller(Controller):
         else:
             yaw = msg.cur_delta[0] / SCREEN_SIZE[0] * AIMING_MAGNIFICATION[0]
             pitch = - msg.cur_delta[1] / SCREEN_SIZE[1] * AIMING_MAGNIFICATION[1]
+            if REVERSE_Y_AXIS:
+                pitch = - pitch
 
         logging.info(f"ROT Y{yaw} P{pitch}")
 
         if not self.debug:
-            if msg.speed[0] == 0 and msg.speed[1] == 0:
+            if msg.speed[0] == 0 and msg.speed[1] == 0 and \
+                    yaw <= AIMING_DEAD_ZONE[0] and pitch <= AIMING_DEAD_ZONE[1]:
                 self.s1.set_robot_mode(mode=robot.GIMBAL_LEAD)
             if self.gimbal_action:
                 self.action_state = self.gimbal_action.is_completed
@@ -100,38 +95,33 @@ class S1Controller(Controller):
             if self.action_state and (
                     50 > abs(yaw) >= AIMING_DEAD_ZONE[0] or 10 > abs(pitch) > AIMING_DEAD_ZONE[1]):
                 self.gimbal_action = self.s1.gimbal.move(yaw=yaw, pitch=pitch,
-                                                         pitch_speed=S1Controller.GIMBAL_SPEED_PITCH,
-                                                         yaw_speed=S1Controller.GIMBAL_SPEED_YAW)
+                                                         pitch_speed=S1Robot.GIMBAL_SPEED_PITCH,
+                                                         yaw_speed=S1Robot.GIMBAL_SPEED_YAW)
 
         if msg.fire:
             if not self.debug:
                 self.s1.blaster.set_led(200)
                 self.s1.blaster.fire(blaster.INFRARED_FIRE, 1)
 
-            self.heat += S1Controller.FIRE_HEAT
+            self.heat += S1Robot.FIRE_HEAT
 
-            if self.heat > S1Controller.MAX_HEAT:
+            if self.heat > S1Robot.MAX_HEAT:
                 self.__bleed(tag="burn")
 
             logging.info("FIRE")
 
-    def hit(self):
-        if self.hit_times > self.last_hit_times:
-            for _ in range(self.last_hit_times, self.hit_times):
-                self.__bleed(tag="hit")
+    def auto_cool(self):
+        while self.hp > 0:
+            time.sleep(0.1)
+            if 0.95 <= time.time() - self.last_cool_time <= 1.05:
+                self.last_cool_time = time.time()
+                self.heat = max(self.heat - S1Robot.COOL_HEAT, 0)
 
-            self.last_hit_times = self.hit_times
-
-    def cool(self):
-        if 0.95 < time.time() - self.last_cool_time < 1.05:
-            self.last_cool_time = time.time()
-            self.heat = max(self.heat - S1Controller.COOL_HEAT, 0)
-
-            logging.info("COOLING DOWN")
+                logging.info("COOLING DOWN")
 
     def __bleed(self, tag: str):
         if tag == "hit":
-            self.hp -= S1Controller.HIT_DMG
+            self.hp -= S1Robot.HIT_DMG
             if not self.debug:
                 self.s1.led.set_led(comp=led.COMP_ALL,
                                     r=SUB_COLOR_RGB_LIST[self.color][0],
@@ -144,7 +134,7 @@ class S1Controller(Controller):
                                     g=COLOR_RGB_LIST[self.color][1],
                                     b=COLOR_RGB_LIST[self.color][2], effect=led.EFFECT_ON)
         elif tag == "burn":
-            burn_hp = max(self.heat - S1Controller.MAX_HEAT, S1Controller.MAX_BURN_DMG)
+            burn_hp = max(self.heat - S1Robot.MAX_HEAT, S1Robot.MAX_BURN_DMG)
             self.hp -= burn_hp
 
         if self.hp <= 0:
@@ -178,6 +168,7 @@ class S1Controller(Controller):
 
         logging.info(f"HIT {hit} TIMES")
 
+        self.__bleed(tag="hit")
         self.hit_times = hit
 
         return hit

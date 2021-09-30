@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import _thread
 import logging
 import multiprocessing as mp
 import time
@@ -33,6 +34,8 @@ def start(color: str, debug: bool, in_queue: mp.Queue, out_queue: mp.Queue, reco
             _ = window_queue.get()
         window_queue.put(Msg2Window(img=cv.transpose(cv.imread("assets/ERR.jpg")), err=True))
 
+    _thread.start_new_thread(s1.auto_cool, ())
+
     while True:
         try:
             time_start = time.time()
@@ -51,9 +54,6 @@ def start(color: str, debug: bool, in_queue: mp.Queue, out_queue: mp.Queue, reco
             else:
                 img = s1.get_img()
 
-            if not debug:
-                s1.hit()
-
             if not in_queue.empty():
                 msg: Msg2Controller = in_queue.get()
 
@@ -62,8 +62,6 @@ def start(color: str, debug: bool, in_queue: mp.Queue, out_queue: mp.Queue, reco
                 if s1.hp == 0:
                     terminate_window(out_queue)
                     break
-
-            s1.cool()
 
             if not out_queue.full():
 

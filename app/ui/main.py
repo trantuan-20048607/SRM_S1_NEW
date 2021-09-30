@@ -7,7 +7,7 @@ import pygame
 from pygame.locals import *
 
 from app.constants import *
-from app.controller.main import *
+from app.controller.const import S1Robot
 from app.controller.msg import *
 from app.ui.msg import *
 
@@ -52,22 +52,22 @@ class Window(object):
         else:
             ft = pygame.font.Font("assets/DX_BOLD.ttf", 30)
 
-            if msg.hp * 3 > S1Controller.INITIAL_HP:
-                self.screen.blit(ft.render(f"HP: {msg.hp} / {S1Controller.INITIAL_HP}",
+            if msg.hp * 3 > S1Robot.INITIAL_HP:
+                self.screen.blit(ft.render(f"HP: {msg.hp} / {S1Robot.INITIAL_HP}",
                                            True, (10, 180, 10)), (100, 50))
             else:
-                self.screen.blit(ft.render(f"HP: {msg.hp} / {S1Controller.INITIAL_HP}",
+                self.screen.blit(ft.render(f"HP: {msg.hp} / {S1Robot.INITIAL_HP}",
                                            True, (160, 20, 10)), (100, 50))
-            if msg.heat > S1Controller.MAX_HEAT:
+            if msg.heat > S1Robot.MAX_HEAT:
                 self.screen.blit(ft.render("热量超限", True, (160, 20, 10)), (100, 100))
-            elif msg.heat > S1Controller.MAX_HEAT * 0.8:
-                self.screen.blit(ft.render(f"CAL: {msg.heat} / {S1Controller.MAX_HEAT}",
+            elif msg.heat > S1Robot.MAX_HEAT * 0.8:
+                self.screen.blit(ft.render(f"CAL: {msg.heat} / {S1Robot.MAX_HEAT}",
                                            True, (160, 20, 10)), (100, 100))
-            elif msg.heat > S1Controller.MAX_HEAT * 0.6:
-                self.screen.blit(ft.render(f"CAL: {msg.heat} / {S1Controller.MAX_HEAT}",
+            elif msg.heat > S1Robot.MAX_HEAT * 0.6:
+                self.screen.blit(ft.render(f"CAL: {msg.heat} / {S1Robot.MAX_HEAT}",
                                            True, (250, 150, 50)), (100, 100))
             else:
-                self.screen.blit(ft.render(f"CAL: {msg.heat} / {S1Controller.MAX_HEAT}",
+                self.screen.blit(ft.render(f"CAL: {msg.heat} / {S1Robot.MAX_HEAT}",
                                            True, (10, 180, 10)), (100, 100))
 
             if record:

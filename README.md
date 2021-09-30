@@ -90,6 +90,7 @@ SRM_S1_NEW
 │   ├───controller    # 控制器
 │   │   ├───proc.py        # 控制器进程
 │   │   ├───main.py        # 功能实现
+│   │   ├───S1Robot.py     # S1 参数定义
 │   │   └───msg.py         # 消息封装
 │   ├───benchmark     # 性能测试
 │   │   ├───timer.py       # 简易计时器
