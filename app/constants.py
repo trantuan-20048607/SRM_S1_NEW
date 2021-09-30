@@ -88,7 +88,7 @@ MIN_VALID_TOTAL_AREA = 64
 # 灰度门限
 GRAY_THRESH = 16
 
-# ROI 激活范围
+# ROI 激活边界
 ROI_LIMIT = 128
 
 # --------------------
