@@ -40,20 +40,20 @@ HIT_EFFECT = {
     "blue": led.EFFECT_FLASH
 }
 
-# 录制视频帧率
-RECORDING_FPS = 30
-
-# 调试模式下，控制器发送消息的间隔时间
-DEBUG_VIDEO_WAIT_TIME = 0.001
-
 # 默认瞄准方式
 DEFAULT_AIM_METHOD = "manual"
 
 # 延迟判定阈值
 QUEUE_BLOCK_THRESH = 2
 
-# 开火消息显示时间（刷新次数）
-FIRE_UI_SHOW_TIME = 10
+# 限制显示帧率
+UI_FPS_LIMIT = 60
+
+# 限制控制器帧率
+CTR_FPS_LIMIT = 45
+
+# 开火消息显示时间（帧数）
+FIRE_UI_SHOW_TIME = 6
 
 # --------------------
 #    ⚪ 手动瞄准设置 ⚪

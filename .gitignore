@@ -4,7 +4,3 @@
 # Ignore Logs.
 /logs/*
 !/log/.keep
-
-# Ignore Temps.
-/tmp/*
-!/tmp/.keep

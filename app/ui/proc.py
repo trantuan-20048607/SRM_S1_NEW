@@ -3,67 +3,35 @@ import logging
 import multiprocessing as mp
 import time
 
-import cv2 as cv
 import pygame
-from PIL import Image
 
 from app.constants import *
 from app.ui.main import *
 from app.ui.msg import *
 
 
-def start(color: str, debug: bool, in_queue: mp.Queue, out_queue: mp.Queue, record: bool):
+def start(color: str, debug: bool, in_queue: mp.Queue, out_queue: mp.Queue):
     assert color in COLOR_LIST
 
     logging.basicConfig(level={True: logging.DEBUG, False: logging.INFO}[debug], filename="logs/ui.log", filemode="w",
                         format="%(asctime)s - %(pathname)s[line:%(lineno)d] - %(levelname)s: %(message)s")
-
-    if record:
-        write_video = cv.VideoWriter(f"tmp/record_{color}.mp4",
-                                     cv.VideoWriter_fourcc(*"avc1"), RECORDING_FPS,
-                                     SCREEN_SIZE, True)
-
     window = Window(debug)
-    msg_cache = Msg2Window()
-
+    fps = 0
+    msg = Msg2Window()
     while True:
-        try:
-            time_start = time.time()
-            using_cache = in_queue.empty()
-
-            if not using_cache:
-                msg: Msg2Window = in_queue.get()
-
-                if msg.terminate:
-                    break
-
-                msg_cache = msg
-
-            else:
-                msg = msg_cache
-
-            window.update(msg, in_queue.qsize(), out_queue.qsize(), record)
-
-            if record:
-                write_video.write(cv.cvtColor(np.asarray(Image.frombytes("RGB", SCREEN_SIZE, pygame.image.tostring(
-                    window.screen.subsurface(0, 0, SCREEN_SIZE[0], SCREEN_SIZE[1]), "RGB"))),
-                                              cv.COLOR_RGB2BGR))
-
-            if msg.err:
-                time.sleep(5)
+        time_start = time.time()
+        if not in_queue.empty():
+            msg = in_queue.get()
+            if msg.terminate:
                 break
-
-            window.feedback(out_queue)
-
-            if not using_cache:
-                logging.info(f"FPS {1 / (time.time() - time_start)}")
-                logging.debug(f"I/O QUE SZ: {in_queue.qsize()}, {out_queue.qsize()}")
-
-        except Exception as e:
-            logging.error(e)
-
-    if record:
-        write_video.release()
-
-    cv.destroyAllWindows()
+        window.update(msg, in_queue.qsize(), out_queue.qsize(), fps)
+        if msg.err:
+            time.sleep(5)
+            break
+        window.feedback(out_queue)
+        while time.time() - time_start < 1.0 / UI_FPS_LIMIT:
+            time.sleep(0.1 / UI_FPS_LIMIT)
+        fps = 1.0 / (time.time() - time_start)
+        logging.debug(f"I/O QUE SZ: {in_queue.qsize()}, {out_queue.qsize()}")
+        logging.info("FPS %.2f" % fps)
     pygame.quit()
