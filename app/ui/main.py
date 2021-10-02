@@ -90,39 +90,39 @@ class Window(object):
                                        (10, 180, 10) if msg.fps[0] * 2 > CTR_FPS_LIMIT else (160, 20, 10)), (0, 20))
             ft = pygame.font.Font("assets/DVS.ttf", 30)
             self.screen.blit(ft.render(
-                f" HP  {msg.hp}/{S1Robot.INITIAL_HP}", True,
-                (10, 180, 10) if msg.hp * 3 > S1Robot.INITIAL_HP else (160, 20, 10)), (100, 50))
+                f"HP {msg.hp}", True,
+                (10, 180, 10) if msg.hp * 3 > S1Robot.INITIAL_HP else (160, 20, 10)), (96, 64))
             if msg.heat > S1Robot.MAX_HEAT:
-                self.screen.blit(ft.render(f"OVERHEAT {msg.heat}", True, (160, 20, 10)), (100, 100))
+                self.screen.blit(ft.render(f"OVERHEAT {msg.heat}", True, (160, 20, 10)), (96, 112))
             elif msg.heat > S1Robot.MAX_HEAT * 0.8:
                 self.screen.blit(ft.render(f"HEAT {msg.heat}/{S1Robot.MAX_HEAT}",
-                                           True, (160, 20, 10)), (100, 100))
+                                           True, (160, 20, 10)), (96, 112))
             elif msg.heat > S1Robot.MAX_HEAT * 0.6:
                 self.screen.blit(ft.render(f"HEAT {msg.heat}/{S1Robot.MAX_HEAT}",
-                                           True, (250, 150, 50)), (100, 100))
+                                           True, (250, 150, 50)), (96, 112))
             else:
                 self.screen.blit(ft.render(f"HEAT {msg.heat}/{S1Robot.MAX_HEAT}",
-                                           True, (10, 180, 10)), (100, 100))
+                                           True, (10, 180, 10)), (96, 112))
             if ui_queue_size > QUEUE_BLOCK_THRESH:
-                self.screen.blit(ft.render(" UI DELAY", True, (160, 20, 10)), (100, 150))
+                self.screen.blit(ft.render("UI", True, (160, 20, 10)), (96, 160))
             if ctr_queue_size > QUEUE_BLOCK_THRESH:
-                self.screen.blit(ft.render("CTR DELAY", True, (160, 20, 10)), (100, 200))
+                self.screen.blit(ft.render("CTR", True, (160, 20, 10)), (192, 160))
             if pygame.mouse.get_pos() != (int(SCREEN_SIZE[0] / 2), int(SCREEN_SIZE[1] / 2)) \
                     and msg.aim_method == "manual":
-                self.screen.blit(ft.render("A", True, (160, 20, 10)), (160, 300))
+                self.screen.blit(ft.render("A", True, (160, 20, 10)), (160, 256))
             if self.fire_show_delay > 0:
-                self.screen.blit(ft.render("F", True, (160, 20, 10)), (220, 300))
+                self.screen.blit(ft.render("F", True, (160, 20, 10)), (224, 256))
                 self.fire_show_delay -= 1
             if self.speed[0] or self.speed[1]:
-                self.screen.blit(ft.render("M", True, (160, 20, 10)), (100, 300))
+                self.screen.blit(ft.render("M", True, (160, 20, 10)), (96, 256))
             if msg.aim_method != self.aim_method:
-                self.screen.blit(ft.render("SWITCHING", True, (160, 20, 10)), (100, 250))
+                self.screen.blit(ft.render("SWITCHING", True, (160, 20, 10)), (96, 208))
             else:
                 if msg.aim_method != "manual":
                     self.screen.blit(ft.render("%s" % AUTO_AIM_METHOD_NAME[msg.aim_method],
-                                               True, (10, 180, 10)), (100, 250))
+                                               True, (10, 180, 10)), (96, 208))
                 else:
-                    self.screen.blit(ft.render("MANUAL AIMING", True, (250, 150, 50)), (100, 250))
+                    self.screen.blit(ft.render("MANUAL", True, (250, 150, 50)), (96, 208))
             if msg.aim_method == "manual":
                 self._draw_indicator(int(SCREEN_SIZE[0] / 2), int(SCREEN_SIZE[1] / 2), self.fire_indicator_type)
             else:
@@ -135,7 +135,8 @@ class Window(object):
                 self._draw_indicator(msg.aim_target[0], msg.aim_target[1], 2)
                 self.last_aim_target = msg.aim_target
             if not self.debug:
-                self.screen.blit(ft.render(f"BAT: {msg.bat}", True, (10, 255, 10)), (300, 50))
+                self.screen.blit(ft.render(
+                    f" BAT {msg.bat}", True, (232, 188, 245)), (SCREEN_SIZE[0] - 192, 64))
         pygame.display.flip()
 
     def feedback(self, out_queue: mp.Queue):
