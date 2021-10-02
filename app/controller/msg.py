@@ -6,8 +6,11 @@ __all__ = ["Msg2Controller"]
 
 
 class Msg2Controller(Msg):
-    def __init__(self, speed: tuple = (0, 0), cur_delta: tuple = (0, 0),
-                 aim_method: str = DEFAULT_AIM_METHOD, fire: bool = False, terminate: bool = False):
+    def __init__(self, speed: tuple = (0, 0),
+                 cur_delta: tuple = (0, 0),
+                 aim_method: str = DEFAULT_AIM_METHOD,
+                 fire: bool = False,
+                 terminate: bool = False):
         super(Msg2Controller, self).__init__()
 
         assert aim_method in AIM_METHOD_SELECT_LIST

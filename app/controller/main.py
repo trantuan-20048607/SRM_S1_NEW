@@ -5,7 +5,6 @@ import time
 
 from robomaster import *
 
-from app.benchmark.timer import *
 from app.constants import *
 from app.controller.const import S1Robot
 from app.controller.msg import *
@@ -51,12 +50,12 @@ class S1Controller(Controller):
             self.action_state = True
             self.gimbal_action = None
 
-    def _modify_hp(self, hp: int):
+    def _modify_hp(self, hp):
         self.lock["hp"].acquire()
         self.hp = hp
         self.lock["hp"].release()
 
-    def _modify_heat(self, heat: int):
+    def _modify_heat(self, heat):
         self.lock["heat"].acquire()
         self.heat = heat
         self.lock["heat"].release()
@@ -71,7 +70,7 @@ class S1Controller(Controller):
                 self._modify_heat(max(self.heat - S1Robot.COOL_HEAT, 0))
             time.sleep(0.1)
 
-    def _bleed(self, tag: str):
+    def _bleed(self, tag):
         if tag == "hit":
             if self.hp <= S1Robot.HIT_DMG:
                 self.die()
@@ -95,11 +94,11 @@ class S1Controller(Controller):
             else:
                 self._modify_hp(self.hp - dmg)
 
-    def _battery_callback(self, bat: int):
+    def _battery_callback(self, bat):
         self.bat = bat
         return bat
 
-    def _ir_hit_callback(self, hit: int):
+    def _ir_hit_callback(self, hit):
         self._bleed(tag="hit")
         return hit
 
@@ -107,11 +106,10 @@ class S1Controller(Controller):
     def _angle_callback(angle: tuple):
         return angle
 
-    def img(self):
+    def img(self) -> np.ndarray:
         return self.s1.camera.read_cv2_image()
 
-    @timer
-    def act(self, img: np.array, msg: Msg2Controller):
+    def act(self, img: np.ndarray, msg: Msg2Controller):
         if msg.terminate:
             self.die()
             return
@@ -122,7 +120,7 @@ class S1Controller(Controller):
             self.aim_method = msg.aim_method
             logging.info(f"AIM MTD CHG {self.aim_method.upper()}")
         if self.aim_method != "manual":
-            self.aim_target = vision.feed(img, color=COLOR_ENEMY_LIST[self.color], tag=self.aim_method)
+            self.aim_target = vision.feed(img, color=COLOR_ENEMY_LIST[self.color], type_=self.aim_method)
             yaw = (self.aim_target[0] - int(SCREEN_SIZE[0] / 2)) / SCREEN_SIZE[0] * AUTO_AIM_MAGNIFICATION[0]
             pitch = (int(SCREEN_SIZE[1] / 2) - self.aim_target[1]) / SCREEN_SIZE[1] * AUTO_AIM_MAGNIFICATION[1]
             logging.info(f"TGT {self.aim_target[0]}, {self.aim_target[1]}")

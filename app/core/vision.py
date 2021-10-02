@@ -16,7 +16,7 @@ _d_t = _d2_t = (SCREEN_SIZE[0] * 0.5, SCREEN_SIZE[1] * 0.5)
 _direct_target_data = _direct_data_cache = (SCREEN_SIZE[0] * 0.5, SCREEN_SIZE[1] * 0.5)
 
 _roi_enabled = False
-_current_tag = DEFAULT_AIM_METHOD
+_current_type = DEFAULT_AIM_METHOD
 
 
 def _kalman_reset():
@@ -53,12 +53,12 @@ def _reset():
     _tri_reset()
 
 
-def _roi_cut_img(img: np.array, center: tuple, size: tuple):
-    return img[max(int(center[1] - size[1] / 2), 0):min(int(center[1] + size[1] / 2), SCREEN_SIZE[1]),
-           max(int(center[0] - size[0] / 2), 0):min(int(center[0] + size[0] / 2), SCREEN_SIZE[0])]
+def _roi_cut_img(img, center, size):
+    return img[max(int(center[1] - size[1] * 0.5), 0):min(int(center[1] + size[1] * 0.5), SCREEN_SIZE[1]),
+           max(int(center[0] - size[0] * 0.5), 0):min(int(center[0] + size[0] * 0.5), SCREEN_SIZE[0])]
 
 
-def _ident_tgt(img: np.array, color: str) -> tuple or None:
+def _ident_tgt(img, color):
     assert color in COLOR_LIST
 
     img_hsv = cv.cvtColor(img, cv.COLOR_BGR2HSV)
@@ -92,25 +92,25 @@ def _ident_tgt(img: np.array, color: str) -> tuple or None:
         return None
 
 
-def _smooth(data: tuple, tag: str):
-    assert tag in AUTO_AIM_METHOD_LIST
+def _smooth(data, type_):
+    assert type_ in AUTO_AIM_METHOD_LIST
 
-    if tag == "kalman":
+    if type_ == "kalman":
         _update_kalman(data)
-    elif tag == "tri":
+    elif type_ == "tri":
         _update_triangular_feedback(data)
 
 
-def _get_target_position(tag: str):
-    assert tag in AUTO_AIM_METHOD_LIST
+def _get_target_position(type_):
+    assert type_ in AUTO_AIM_METHOD_LIST
 
     global _direct_data_cache
 
-    if tag == "kalman":
+    if type_ == "kalman":
         return int(_current_pre[0][0]), int(_current_pre[1][0])
-    elif tag == "tri":
+    elif type_ == "tri":
         return int(_d_t[0]), int(_d_t[1])
-    elif tag == "direct":
+    elif type_ == "direct":
         if _direct_target_data:
             _direct_data_cache = _direct_target_data
             return int(_direct_target_data[0]), int(_direct_target_data[1])
@@ -118,14 +118,14 @@ def _get_target_position(tag: str):
             return int(_direct_data_cache[0]), int(_direct_data_cache[1])
 
 
-def _triangular_weight(max_len: int or float):
+def _triangular_weight(len_):
     for i in range(len(TRIANGULAR_SIDE_LEN_LEVEL)):
-        if max_len < TRIANGULAR_SIDE_LEN_LEVEL[i]:
+        if len_ < TRIANGULAR_SIDE_LEN_LEVEL[i]:
             return TRIANGULAR_DIFFERENCE_WEIGHT[i]
     return TRIANGULAR_DIFFERENCE_WEIGHT[-1]
 
 
-def _update_triangular_feedback(data: tuple):
+def _update_triangular_feedback(data):
     global _d_t, _d2_t
 
     points = (np.array(data), np.array(_d_t), np.array(_d2_t))
@@ -138,7 +138,7 @@ def _update_triangular_feedback(data: tuple):
     _d_t = (g_center_x / weight, g_center_y / weight)
 
 
-def _update_kalman(data: tuple):
+def _update_kalman(data):
     global _last_pre, _current_pre, _last_mes, _current_mes
 
     _last_pre = _current_pre
@@ -148,38 +148,39 @@ def _update_kalman(data: tuple):
     _current_pre = _kalman.predict()
 
 
-def feed(img: np.array, color: str, tag: str = AIM_METHOD_SELECT_LIST[DEFAULT_AIM_METHOD]):
-    assert tag in AUTO_AIM_METHOD_LIST
+def feed(img: np.ndarray, color: str, type_: str = AIM_METHOD_SELECT_LIST[DEFAULT_AIM_METHOD]) -> (int, int):
+    assert type_ in AUTO_AIM_METHOD_LIST
+    assert img.shape == (SCREEN_SIZE[1], SCREEN_SIZE[0], 3)
     assert color in COLOR_LIST
 
-    global _roi_enabled, _last_pre, _last_mes, _current_pre, _current_mes, _direct_target_data, _current_tag
+    global _roi_enabled, _last_pre, _last_mes, _current_pre, _current_mes, _direct_target_data, _current_type
 
-    if tag != _current_tag:
+    if type_ != _current_type:
         _reset()
-        _current_tag = tag
-    last_x, last_y = _get_target_position(tag)
-    if last_x > SCREEN_SIZE[0] - ROI_LIMIT or last_y > SCREEN_SIZE[1] - ROI_LIMIT or \
-            last_x < ROI_LIMIT or last_y < ROI_LIMIT:
-        _roi_enabled = False
+        _current_type = type_
+    last_x, last_y = _get_target_position(type_)
     if last_x > SCREEN_SIZE[0] or last_y > SCREEN_SIZE[1] or \
             last_x < 0 or last_y < 0:
         _reset()
+    elif last_x > SCREEN_SIZE[0] - ROI_LIMIT or last_y > SCREEN_SIZE[1] - ROI_LIMIT or \
+            last_x < ROI_LIMIT or last_y < ROI_LIMIT:
+        _roi_enabled = False
 
     if not _roi_enabled:
         _direct_target_data = _ident_tgt(img, color)
         if _direct_target_data:
             _roi_enabled = True
-            _smooth(_direct_target_data, tag)
-            return _get_target_position(tag)
+            _smooth(_direct_target_data, type_)
+            return _get_target_position(type_)
         else:
-            return _get_target_position(tag)
+            return _get_target_position(type_)
     else:
         _direct_target_data = _ident_tgt(_roi_cut_img(img, (last_x, last_y), ROI_SIZE), color)
         if _direct_target_data:
             _direct_target_data = (_direct_target_data[0] - ROI_SIZE[0] * 0.5 + last_x,
                                    _direct_target_data[1] - ROI_SIZE[1] * 0.5 + last_y)
-            _smooth(_direct_target_data, tag)
-            return _get_target_position(tag)
+            _smooth(_direct_target_data, type_)
+            return _get_target_position(type_)
         else:
             _roi_enabled = False
-            return _get_target_position(tag)
+            return _get_target_position(type_)
