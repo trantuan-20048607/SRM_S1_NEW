@@ -52,6 +52,12 @@ UI_FPS_LIMIT = 60
 # 限制控制器帧率
 CTR_FPS_LIMIT = 45
 
+# 准星类型: 0 关闭，1 十字，2 圆点
+FIRE_IND_TYPE = 1
+
+# 准星大小
+FIRE_IND_SIZE = 12
+
 # 开火消息显示时间（帧数）
 FIRE_UI_SHOW_TIME = 6
 

@@ -9,11 +9,12 @@ __all__ = ["Container"]
 
 
 class Container(object):
-    def __init__(self, color: str, debug: bool):
+    def __init__(self, color: str, debug: bool, record: bool):
         assert color in COLOR_LIST
 
         self.color = color
         self.debug = debug
+        self.record = record
 
     def start(self):
         msg_ui_2_ctr_queue = mp.Queue()

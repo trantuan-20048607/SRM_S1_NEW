@@ -18,6 +18,7 @@ def start(color: str, debug: bool, in_queue: mp.Queue, out_queue: mp.Queue):
                         filename="logs/controller.log", filemode="w",
                         format="%(asctime)s - %(pathname)s[line:%(lineno)d] - %(levelname)s: %(message)s")
     read_video = cv.VideoCapture("assets/s1%s.avi" % COLOR_ENEMY_LIST[color])
+    real_fps, max_fps = 0.0, 0.0
     s1 = S1Controller("S1", color, debug)
 
     def terminate_window():
@@ -28,7 +29,7 @@ def start(color: str, debug: bool, in_queue: mp.Queue, out_queue: mp.Queue):
     def report_error():
         if out_queue.full():
             _ = out_queue.get()
-        out_queue.put(Msg2Window(img=cv.transpose(cv.imread("assets/ERR.jpg")), err=True))
+        out_queue.put(Msg2Window(img=cv.imread("assets/ERR.jpg"), err=True))
 
     while True:
         try:
@@ -50,13 +51,16 @@ def start(color: str, debug: bool, in_queue: mp.Queue, out_queue: mp.Queue):
                     break
             if out_queue.qsize() <= QUEUE_BLOCK_THRESH:
                 out_queue.put(
-                    Msg2Window(img=cv.transpose(img), hp=s1.hp, heat=s1.heat, bat=s1.bat,
-                               aim_method=s1.aim_method, aim_target=s1.aim_target))
+                    Msg2Window(img=img, hp=s1.hp, heat=s1.heat, bat=s1.bat,
+                               aim_method=s1.aim_method, aim_target=s1.aim_target,
+                               fps=(real_fps, max_fps)))
             else:
                 logging.warning("UI MSG QUEUE FULL")
+            max_fps = 1 / (time.time() - time_start)
             while time.time() - time_start < 1.0 / CTR_FPS_LIMIT:
-                time.sleep(0.1 / CTR_FPS_LIMIT)
-            logging.info("FPS %.2f" % (1 / (time.time() - time_start)))
+                time.sleep(0.01 / CTR_FPS_LIMIT)
+            real_fps = 1 / (time.time() - time_start)
+            logging.info("FPS %.2f %.2f" % (real_fps, max_fps))
         except Exception as e:
             logging.error(e)
             report_error()

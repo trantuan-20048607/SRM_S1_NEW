@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import logging
+import math
 import multiprocessing as mp
 
 import cv2 as cv
@@ -30,11 +31,48 @@ class Window(object):
         self.debug = debug
         self.screen = pygame.display.set_mode(SCREEN_SIZE, flags=pygame.DOUBLEBUF)
         self.speed = (0, 0)
+        self.cur_delta = (0, 0)
         self.fire_show_delay = 0
+        self.fire_indicator_type = FIRE_IND_TYPE
         self.aim_method = DEFAULT_AIM_METHOD
+        self.last_aim_target = (int(SCREEN_SIZE[0] * 0.5), int(SCREEN_SIZE[1] * 0.5))
 
-    def update(self, msg: Msg2Window, ui_queue_size: int, ctr_queue_size: int, fps: float):
-        pygame.surfarray.blit_array(self.screen, cv.cvtColor(msg.img, cv.COLOR_BGR2RGB))
+    def _draw_indicator(self, x: int, y: int, type_: int):
+        dist = 4 * int(math.log(self.cur_delta[0] * self.cur_delta[0] + self.cur_delta[1] * self.cur_delta[1] + 1))
+        if dist <= FIRE_IND_SIZE / 2:
+            color = (10, 180, 10)
+        elif dist <= FIRE_IND_SIZE * 2:
+            color = (250, 150, 50)
+        else:
+            color = (160, 20, 10)
+        if type_ == 1:
+            dist = max(dist, FIRE_IND_SIZE / 2)
+            pygame.draw.rect(self.screen, color, pygame.Rect(
+                x - FIRE_IND_SIZE - dist, y - 1, FIRE_IND_SIZE, 2))
+            pygame.draw.rect(self.screen, color, pygame.Rect(
+                x + dist, y - 1, FIRE_IND_SIZE, 2))
+            pygame.draw.rect(self.screen, color, pygame.Rect(
+                x - 1, y - FIRE_IND_SIZE - dist, 2, FIRE_IND_SIZE))
+            pygame.draw.rect(self.screen, color, pygame.Rect(
+                x - 1, y + dist, 2, FIRE_IND_SIZE))
+            pygame.draw.circle(self.screen, color, (x, y), 2)
+        elif type_ == 2:
+            dist = min(max(1.5 * dist, FIRE_IND_SIZE), 60)
+            pygame.draw.circle(self.screen, color, (x, y), dist, 2)
+            if dist > 8:
+                pygame.draw.circle(self.screen, color, (x, y), 2)
+
+    def _update_cur(self):
+        if self.aim_method == "manual":
+            self.cur_delta = (0, 0)
+            cur_current = pygame.mouse.get_pos()
+            if cur_current != (int(SCREEN_SIZE[0] / 2), int(SCREEN_SIZE[1] / 2)):
+                self.cur_delta = (cur_current[0] - int(SCREEN_SIZE[0] / 2),
+                                  cur_current[1] - int(SCREEN_SIZE[1] / 2))
+                pygame.mouse.set_pos(int(SCREEN_SIZE[0] / 2), int(SCREEN_SIZE[1] / 2))
+
+    def update(self, msg: Msg2Window, ui_queue_size: int, ctr_queue_size: int, fps: tuple):
+        pygame.surfarray.blit_array(self.screen, cv.cvtColor(cv.transpose(msg.img), cv.COLOR_BGR2RGB))
         if msg.err:
             self.screen.blit(pygame.font.Font(
                 "assets/DX_BOLD.ttf", 70).render(
@@ -45,8 +83,11 @@ class Window(object):
                 "程序将自动退出", True, (160, 20, 10)),
                 (int((SCREEN_SIZE[0] - 350) / 2), int(SCREEN_SIZE[1] / 2)))
         else:
-            self.screen.blit(pygame.font.Font("assets/DX_BOLD.ttf", 24).render(
-                "FPS %.2f" % fps, True, (10, 180, 10) if fps * 2 > UI_FPS_LIMIT else (160, 20, 10)), (0, 0))
+            ft = pygame.font.Font("assets/DX_BOLD.ttf", 20)
+            self.screen.blit(ft.render("显示帧率 %.0f/%.0f" % fps, True,
+                                       (10, 180, 10) if fps[0] * 2 > UI_FPS_LIMIT else (160, 20, 10)), (0, 0))
+            self.screen.blit(ft.render("控制帧率 %.0f/%.0f" % msg.fps, True,
+                                       (10, 180, 10) if msg.fps[0] * 2 > UI_FPS_LIMIT else (160, 20, 10)), (0, 20))
             ft = pygame.font.Font("assets/DX_BOLD.ttf", 30)
             self.screen.blit(ft.render(
                 f"HP: {msg.hp} / {S1Robot.INITIAL_HP}", True,
@@ -82,33 +123,25 @@ class Window(object):
                                                True, (10, 180, 10)), (100, 250))
                 else:
                     self.screen.blit(ft.render("手动瞄准", True, (250, 150, 50)), (100, 250))
-            if msg.aim_method != "manual":
-                pygame.draw.rect(
-                    self.screen, (10, 180, 10), pygame.Rect(
-                        msg.aim_target[0] - 60, msg.aim_target[1] - 60, 120, 120), 3)
-                pygame.draw.circle(
-                    self.screen, (10, 180, 10), msg.aim_target, 3, 3)
+            if msg.aim_method == "manual":
+                self._draw_indicator(int(SCREEN_SIZE[0] / 2), int(SCREEN_SIZE[1] / 2), self.fire_indicator_type)
+            else:
                 self.screen.blit(pygame.font.Font("assets/DX_BOLD.ttf", 16).render(
                     f"{msg.aim_target[0]},{msg.aim_target[1]}", True, (10, 180, 10)
                 ), (msg.aim_target[0] - 60, msg.aim_target[1] - 60))
+                self.cur_delta = (msg.aim_target[0] - self.last_aim_target[0],
+                                  msg.aim_target[1] - self.last_aim_target[1])
+                self._draw_indicator(msg.aim_target[0], msg.aim_target[1], 2)
+                self.last_aim_target = msg.aim_target
             if not self.debug:
                 self.screen.blit(ft.render(f"BAT: {msg.bat}", True, (10, 255, 10)), (300, 50))
         pygame.display.flip()
 
-    def _update_cur(self):
-        cur_delta = (0, 0)
-        if self.aim_method == "manual":
-            cur_current = pygame.mouse.get_pos()
-            if cur_current != (int(SCREEN_SIZE[0] / 2), int(SCREEN_SIZE[1] / 2)):
-                cur_delta = (cur_current[0] - int(SCREEN_SIZE[0] / 2),
-                             cur_current[1] - int(SCREEN_SIZE[1] / 2))
-                pygame.mouse.set_pos(int(SCREEN_SIZE[0] / 2), int(SCREEN_SIZE[1] / 2))
-        else:
-            pygame.mouse.set_pos(int(SCREEN_SIZE[0] / 2), int(SCREEN_SIZE[1] / 2))
-        return cur_delta
-
     def feedback(self, out_queue: mp.Queue):
         for event in pygame.event.get():
+            if event.type == KEYDOWN and event.key == K_i:
+                self.fire_indicator_type = (self.fire_indicator_type + 1) % 3
+                continue
             speed, aim_method = self.speed, self.aim_method
             terminate, cur_delta = event.type == QUIT, (0, 0)
             if event.type == KEYDOWN and event.key in Window.SPEED_MAP:
@@ -124,10 +157,12 @@ class Window(object):
                 if event.type == MOUSEBUTTONDOWN:
                     self.fire_show_delay = FIRE_UI_SHOW_TIME
                 self.aim_method = aim_method
-                out_queue.put(Msg2Controller(speed=speed, cur_delta=self._update_cur(), aim_method=self.aim_method,
+                self._update_cur()
+                out_queue.put(Msg2Controller(speed=speed, cur_delta=self.cur_delta, aim_method=self.aim_method,
                                              fire=event.type == MOUSEBUTTONDOWN, terminate=terminate))
                 self.speed = speed
             else:
                 logging.warning("CTR MSG QUEUE FULL")
         if out_queue.empty():
-            out_queue.put(Msg2Controller(speed=self.speed, cur_delta=self._update_cur(), aim_method=self.aim_method))
+            self._update_cur()
+            out_queue.put(Msg2Controller(speed=self.speed, cur_delta=self.cur_delta, aim_method=self.aim_method))
