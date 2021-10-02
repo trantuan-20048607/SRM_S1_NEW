@@ -47,10 +47,10 @@ DEFAULT_AIM_METHOD = "manual"
 QUEUE_BLOCK_THRESH = 2
 
 # 限制显示帧率
-UI_FPS_LIMIT = 60
+UI_FPS_LIMIT = 75
 
 # 限制控制器帧率
-CTR_FPS_LIMIT = 45
+CTR_FPS_LIMIT = 30
 
 # 准星类型: 0 关闭，1 十字，2 圆点
 FIRE_IND_TYPE = 1
@@ -114,9 +114,9 @@ AIM_METHOD_SELECT_LIST = {"manual": "tri",
 AUTO_AIM_METHOD_LIST = ("kalman", "tri", "direct")
 
 # 各个自瞄方法的显示名称
-AUTO_AIM_METHOD_NAME = {"tri": "差分反馈",
-                        "kalman": "KALMAN",
-                        "direct": "原始数据"}
+AUTO_AIM_METHOD_NAME = {"tri": "TRIANGULAR LIMIT",
+                        "kalman": "KALMAN FILTER",
+                        "direct": "ORIGINAL DATA"}
 
 # KALMAN 滤波器参数，详见 README
 KALMAN_SHAKE_CONTROL = 1e-3

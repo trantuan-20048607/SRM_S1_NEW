@@ -30,8 +30,7 @@ def start(color: str, debug: bool, in_queue: mp.Queue, out_queue: mp.Queue):
             break
         window.feedback(out_queue)
         max_fps = 1.0 / (time.time() - time_start)
-        while time.time() - time_start < 1.0 / UI_FPS_LIMIT:
-            time.sleep(0.01 / UI_FPS_LIMIT)
+        time.sleep(max((1.0 / UI_FPS_LIMIT) - (time.time() - time_start), 0))
         real_fps = 1.0 / (time.time() - time_start)
         logging.debug(f"I/O QUE SZ: {in_queue.qsize()}, {out_queue.qsize()}")
         logging.info("FPS %.2f %.2f" % (real_fps, max_fps))

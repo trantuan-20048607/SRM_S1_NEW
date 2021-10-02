@@ -25,7 +25,7 @@ class Window(object):
         pygame.event.set_allowed([MOUSEBUTTONDOWN, KEYUP, KEYDOWN])
         pygame.event.set_blocked(MOUSEMOTION)
         pygame.display.set_caption("SRM 校内赛")
-        pygame.mouse.set_visible(debug)
+        pygame.mouse.set_visible(False)
         pygame.event.set_grab(True)
 
         self.debug = debug
@@ -39,7 +39,7 @@ class Window(object):
 
     def _draw_indicator(self, x: int, y: int, type_: int):
         dist = 4 * int(math.log(self.cur_delta[0] * self.cur_delta[0] + self.cur_delta[1] * self.cur_delta[1] + 1))
-        if dist <= FIRE_IND_SIZE / 2:
+        if dist <= FIRE_IND_SIZE:
             color = (10, 180, 10)
         elif dist <= FIRE_IND_SIZE * 2:
             color = (250, 150, 50)
@@ -75,25 +75,25 @@ class Window(object):
         pygame.surfarray.blit_array(self.screen, cv.cvtColor(cv.transpose(msg.img), cv.COLOR_BGR2RGB))
         if msg.err:
             self.screen.blit(pygame.font.Font(
-                "assets/DX_BOLD.ttf", 70).render(
-                "控制器出错", True, (160, 20, 10)),
-                (int((SCREEN_SIZE[0] - 350) / 2), int(SCREEN_SIZE[1] / 2) - 70))
+                "assets/DVS.ttf", 70).render(
+                "CONTROLLER ERROR", True, (160, 20, 10)),
+                (int((SCREEN_SIZE[0] - 640) / 2), int(SCREEN_SIZE[1] / 2) - 70))
             self.screen.blit(pygame.font.Font(
-                "assets/DX_BOLD.ttf", 50).render(
-                "程序将自动退出", True, (160, 20, 10)),
-                (int((SCREEN_SIZE[0] - 350) / 2), int(SCREEN_SIZE[1] / 2)))
+                "assets/DVS.ttf", 32).render(
+                "PROGRAM WILL EXIT AUTOMATICALLY IN 5 SECONDS", True, (160, 20, 10)),
+                (int((SCREEN_SIZE[0] - 836) / 2), int(SCREEN_SIZE[1] / 2)))
         else:
-            ft = pygame.font.Font("assets/DX_BOLD.ttf", 20)
-            self.screen.blit(ft.render("显示帧率 %.0f/%.0f" % fps, True,
+            ft = pygame.font.Font("assets/DVS.ttf", 20)
+            self.screen.blit(ft.render("FPS UI %.0f/%.0f" % fps, True,
                                        (10, 180, 10) if fps[0] * 2 > UI_FPS_LIMIT else (160, 20, 10)), (0, 0))
-            self.screen.blit(ft.render("控制帧率 %.0f/%.0f" % msg.fps, True,
-                                       (10, 180, 10) if msg.fps[0] * 2 > UI_FPS_LIMIT else (160, 20, 10)), (0, 20))
-            ft = pygame.font.Font("assets/DX_BOLD.ttf", 30)
+            self.screen.blit(ft.render("   CTR %.0f/%.0f" % msg.fps, True,
+                                       (10, 180, 10) if msg.fps[0] * 2 > CTR_FPS_LIMIT else (160, 20, 10)), (0, 20))
+            ft = pygame.font.Font("assets/DVS.ttf", 30)
             self.screen.blit(ft.render(
                 f"HP: {msg.hp} / {S1Robot.INITIAL_HP}", True,
                 (10, 180, 10) if msg.hp * 3 > S1Robot.INITIAL_HP else (160, 20, 10)), (100, 50))
             if msg.heat > S1Robot.MAX_HEAT:
-                self.screen.blit(ft.render("热量超限", True, (160, 20, 10)), (100, 100))
+                self.screen.blit(ft.render("O V E R H E A T", True, (160, 20, 10)), (100, 100))
             elif msg.heat > S1Robot.MAX_HEAT * 0.8:
                 self.screen.blit(ft.render(f"CAL: {msg.heat} / {S1Robot.MAX_HEAT}",
                                            True, (160, 20, 10)), (100, 100))
@@ -104,30 +104,31 @@ class Window(object):
                 self.screen.blit(ft.render(f"CAL: {msg.heat} / {S1Robot.MAX_HEAT}",
                                            True, (10, 180, 10)), (100, 100))
             if ui_queue_size > QUEUE_BLOCK_THRESH:
-                self.screen.blit(ft.render("显示延迟", True, (160, 20, 10)), (100, 150))
+                self.screen.blit(ft.render(" UI DELAY", True, (160, 20, 10)), (100, 150))
             if ctr_queue_size > QUEUE_BLOCK_THRESH:
-                self.screen.blit(ft.render("操作延迟", True, (160, 20, 10)), (100, 200))
+                self.screen.blit(ft.render("CTR DELAY", True, (160, 20, 10)), (100, 200))
             if pygame.mouse.get_pos() != (int(SCREEN_SIZE[0] / 2), int(SCREEN_SIZE[1] / 2)) \
                     and msg.aim_method == "manual":
-                self.screen.blit(ft.render("瞄准", True, (160, 20, 10)), (160, 300))
+                self.screen.blit(ft.render("A", True, (160, 20, 10)), (160, 300))
             if self.fire_show_delay > 0:
-                self.screen.blit(ft.render("开火", True, (160, 20, 10)), (220, 300))
+                self.screen.blit(ft.render("F", True, (160, 20, 10)), (220, 300))
                 self.fire_show_delay -= 1
             if self.speed[0] or self.speed[1]:
-                self.screen.blit(ft.render("移动", True, (160, 20, 10)), (100, 300))
+                self.screen.blit(ft.render("M", True, (160, 20, 10)), (100, 300))
             if msg.aim_method != self.aim_method:
-                self.screen.blit(ft.render("瞄准模式切换中", True, (160, 20, 10)), (100, 250))
+                self.screen.blit(ft.render("SWITCHING", True, (160, 20, 10)), (100, 250))
             else:
                 if msg.aim_method != "manual":
-                    self.screen.blit(ft.render("自动瞄准: %s" % AUTO_AIM_METHOD_NAME[msg.aim_method],
+                    self.screen.blit(ft.render("%s" % AUTO_AIM_METHOD_NAME[msg.aim_method],
                                                True, (10, 180, 10)), (100, 250))
                 else:
-                    self.screen.blit(ft.render("手动瞄准", True, (250, 150, 50)), (100, 250))
+                    self.screen.blit(ft.render("MANUAL AIMING", True, (250, 150, 50)), (100, 250))
             if msg.aim_method == "manual":
                 self._draw_indicator(int(SCREEN_SIZE[0] / 2), int(SCREEN_SIZE[1] / 2), self.fire_indicator_type)
             else:
-                self.screen.blit(pygame.font.Font("assets/DX_BOLD.ttf", 16).render(
-                    f"{msg.aim_target[0]},{msg.aim_target[1]}", True, (10, 180, 10)
+                self.screen.blit(pygame.font.Font("assets/DVS.ttf", 16).render(
+                    f"{int(msg.aim_target[0] - SCREEN_SIZE[0] / 2)},{int(msg.aim_target[1] - SCREEN_SIZE[1] / 2)}",
+                    True, (10, 180, 10)
                 ), (msg.aim_target[0] - 60, msg.aim_target[1] - 60))
                 self.cur_delta = (msg.aim_target[0] - self.last_aim_target[0],
                                   msg.aim_target[1] - self.last_aim_target[1])
@@ -156,7 +157,9 @@ class Window(object):
             if not out_queue.full():
                 if event.type == MOUSEBUTTONDOWN:
                     self.fire_show_delay = FIRE_UI_SHOW_TIME
-                self.aim_method = aim_method
+                if self.aim_method != aim_method:
+                    self.aim_method = aim_method
+                    pygame.mouse.set_visible(self.aim_method != "manual")
                 self._update_cur()
                 out_queue.put(Msg2Controller(speed=speed, cur_delta=self.cur_delta, aim_method=self.aim_method,
                                              fire=event.type == MOUSEBUTTONDOWN, terminate=terminate))

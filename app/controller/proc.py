@@ -49,7 +49,7 @@ def start(color: str, debug: bool, in_queue: mp.Queue, out_queue: mp.Queue):
                 if s1.hp == 0:
                     terminate_window()
                     break
-            if out_queue.qsize() <= QUEUE_BLOCK_THRESH:
+            if not out_queue.full():
                 out_queue.put(
                     Msg2Window(img=img, hp=s1.hp, heat=s1.heat, bat=s1.bat,
                                aim_method=s1.aim_method, aim_target=s1.aim_target,
@@ -57,12 +57,12 @@ def start(color: str, debug: bool, in_queue: mp.Queue, out_queue: mp.Queue):
             else:
                 logging.warning("UI MSG QUEUE FULL")
             max_fps = 1 / (time.time() - time_start)
-            while time.time() - time_start < 1.0 / CTR_FPS_LIMIT:
-                time.sleep(0.01 / CTR_FPS_LIMIT)
+            time.sleep(max((1.0 / CTR_FPS_LIMIT) - (time.time() - time_start), 0))
             real_fps = 1 / (time.time() - time_start)
             logging.info("FPS %.2f %.2f" % (real_fps, max_fps))
         except Exception as e:
             logging.error(e)
+            s1.die()
             report_error()
             break
     read_video.release()
