@@ -90,18 +90,18 @@ class Window(object):
                                        (10, 180, 10) if msg.fps[0] * 2 > CTR_FPS_LIMIT else (160, 20, 10)), (0, 20))
             ft = pygame.font.Font("assets/DVS.ttf", 30)
             self.screen.blit(ft.render(
-                f"HP: {msg.hp} / {S1Robot.INITIAL_HP}", True,
+                f" HP  {msg.hp}/{S1Robot.INITIAL_HP}", True,
                 (10, 180, 10) if msg.hp * 3 > S1Robot.INITIAL_HP else (160, 20, 10)), (100, 50))
             if msg.heat > S1Robot.MAX_HEAT:
-                self.screen.blit(ft.render("O V E R H E A T", True, (160, 20, 10)), (100, 100))
+                self.screen.blit(ft.render(f"OVERHEAT {msg.heat}", True, (160, 20, 10)), (100, 100))
             elif msg.heat > S1Robot.MAX_HEAT * 0.8:
-                self.screen.blit(ft.render(f"CAL: {msg.heat} / {S1Robot.MAX_HEAT}",
+                self.screen.blit(ft.render(f"HEAT {msg.heat}/{S1Robot.MAX_HEAT}",
                                            True, (160, 20, 10)), (100, 100))
             elif msg.heat > S1Robot.MAX_HEAT * 0.6:
-                self.screen.blit(ft.render(f"CAL: {msg.heat} / {S1Robot.MAX_HEAT}",
+                self.screen.blit(ft.render(f"HEAT {msg.heat}/{S1Robot.MAX_HEAT}",
                                            True, (250, 150, 50)), (100, 100))
             else:
-                self.screen.blit(ft.render(f"CAL: {msg.heat} / {S1Robot.MAX_HEAT}",
+                self.screen.blit(ft.render(f"HEAT {msg.heat}/{S1Robot.MAX_HEAT}",
                                            True, (10, 180, 10)), (100, 100))
             if ui_queue_size > QUEUE_BLOCK_THRESH:
                 self.screen.blit(ft.render(" UI DELAY", True, (160, 20, 10)), (100, 150))
