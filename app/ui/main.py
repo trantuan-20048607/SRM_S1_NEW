@@ -2,6 +2,7 @@
 import logging
 import math
 import multiprocessing as mp
+import time
 
 import cv2 as cv
 import pygame
@@ -72,17 +73,21 @@ class Window(object):
                 pygame.mouse.set_pos(int(SCREEN_SIZE[0] / 2), int(SCREEN_SIZE[1] / 2))
 
     def update(self, msg: Msg2Window, ui_queue_size: int, ctr_queue_size: int, fps: tuple):
-        pygame.surfarray.blit_array(self.screen, cv.cvtColor(msg.img, cv.COLOR_BGR2RGB))
         if msg.err:
-            self.screen.blit(pygame.font.Font(
-                "assets/DVS.ttf", 70).render(
-                "CONTROLLER ERROR", True, (160, 20, 10)),
-                (int((SCREEN_SIZE[0] - 640) / 2), int(SCREEN_SIZE[1] / 2) - 70))
-            self.screen.blit(pygame.font.Font(
-                "assets/DVS.ttf", 32).render(
-                "PROGRAM WILL EXIT AUTOMATICALLY IN 5 SECONDS", True, (160, 20, 10)),
-                (int((SCREEN_SIZE[0] - 836) / 2), int(SCREEN_SIZE[1] / 2)))
+            for i in range(5):
+                pygame.surfarray.blit_array(self.screen, cv.cvtColor(msg.img, cv.COLOR_BGR2RGB))
+                self.screen.blit(pygame.font.Font(
+                    "assets/DVS.ttf", 70).render(
+                    "CONTROLLER ERROR", True, (160, 20, 10)),
+                    (int((SCREEN_SIZE[0] - 640) / 2), int(SCREEN_SIZE[1] / 2) - 70))
+                self.screen.blit(pygame.font.Font(
+                    "assets/DVS.ttf", 32).render(
+                    f"PROGRAM WILL EXIT AUTOMATICALLY IN {5 - i} SECONDS", True, (160, 20, 10)),
+                    (int((SCREEN_SIZE[0] - 836) / 2), int(SCREEN_SIZE[1] / 2)))
+                pygame.display.flip()
+                time.sleep(1)
         else:
+            pygame.surfarray.blit_array(self.screen, cv.cvtColor(msg.img, cv.COLOR_BGR2RGB))
             ft = pygame.font.Font("assets/DVS.ttf", 20)
             self.screen.blit(ft.render("FPS UI  %.0f/%.0f" % fps, True,
                                        (10, 180, 10) if fps[0] * 2 > UI_FPS_LIMIT else (160, 20, 10)), (0, 0))
@@ -137,7 +142,7 @@ class Window(object):
             if not self.debug:
                 self.screen.blit(ft.render(
                     f" BAT {msg.bat}", True, (232, 188, 245)), (SCREEN_SIZE[0] - 192, 64))
-        pygame.display.flip()
+            pygame.display.flip()
 
     def feedback(self, out_queue: mp.Queue):
         for event in pygame.event.get():
@@ -162,9 +167,9 @@ class Window(object):
                     self.aim_method = aim_method
                     pygame.mouse.set_visible(self.aim_method != "manual")
                 self._update_cur()
+                self.speed = speed
                 out_queue.put(Msg2Controller(speed=speed, cur_delta=self.cur_delta, aim_method=self.aim_method,
                                              fire=event.type == MOUSEBUTTONDOWN, terminate=terminate))
-                self.speed = speed
             else:
                 logging.warning("CTR MSG QUEUE FULL")
         if out_queue.empty():

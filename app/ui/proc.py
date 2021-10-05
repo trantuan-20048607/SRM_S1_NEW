@@ -26,7 +26,6 @@ def start(color: str, debug: bool, in_queue: mp.Queue, out_queue: mp.Queue):
                 break
         window.update(msg, in_queue.qsize(), out_queue.qsize(), (real_fps, max_fps))
         if msg.err:
-            time.sleep(5)
             break
         window.feedback(out_queue)
         max_fps = 1.0 / (time.time() - time_start)
