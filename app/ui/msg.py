@@ -5,7 +5,7 @@ from app.constants import *
 from app.core.msg import *
 
 __all__ = ["Msg2Window"]
-_default_img = cv.imread("assets/BACK.jpg")
+_default_img = cv.transpose(cv.imread("assets/BACK.jpg"))
 
 
 class Msg2Window(Msg):

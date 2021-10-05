@@ -72,7 +72,7 @@ class Window(object):
                 pygame.mouse.set_pos(int(SCREEN_SIZE[0] / 2), int(SCREEN_SIZE[1] / 2))
 
     def update(self, msg: Msg2Window, ui_queue_size: int, ctr_queue_size: int, fps: tuple):
-        pygame.surfarray.blit_array(self.screen, cv.cvtColor(cv.transpose(msg.img), cv.COLOR_BGR2RGB))
+        pygame.surfarray.blit_array(self.screen, cv.cvtColor(msg.img, cv.COLOR_BGR2RGB))
         if msg.err:
             self.screen.blit(pygame.font.Font(
                 "assets/DVS.ttf", 70).render(
@@ -84,9 +84,9 @@ class Window(object):
                 (int((SCREEN_SIZE[0] - 836) / 2), int(SCREEN_SIZE[1] / 2)))
         else:
             ft = pygame.font.Font("assets/DVS.ttf", 20)
-            self.screen.blit(ft.render("FPS UI %.0f/%.0f" % fps, True,
+            self.screen.blit(ft.render("FPS UI  %.0f/%.0f" % fps, True,
                                        (10, 180, 10) if fps[0] * 2 > UI_FPS_LIMIT else (160, 20, 10)), (0, 0))
-            self.screen.blit(ft.render("   CTR %.0f/%.0f" % msg.fps, True,
+            self.screen.blit(ft.render("FPS CTR %.0f/%.0f" % msg.fps, True,
                                        (10, 180, 10) if msg.fps[0] * 2 > CTR_FPS_LIMIT else (160, 20, 10)), (0, 20))
             ft = pygame.font.Font("assets/DVS.ttf", 30)
             self.screen.blit(ft.render(

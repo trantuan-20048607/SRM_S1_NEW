@@ -29,7 +29,8 @@ def start(color: str, debug: bool, in_queue: mp.Queue, out_queue: mp.Queue):
     def report_error():
         if out_queue.full():
             _ = out_queue.get()
-        out_queue.put(Msg2Window(img=cv.imread("assets/ERR.jpg"), err=True))
+        out_queue.put(Msg2Window(
+            img=cv.transpose(cv.imread("assets/ERR.jpg")), err=True))
 
     while True:
         try:
@@ -51,7 +52,7 @@ def start(color: str, debug: bool, in_queue: mp.Queue, out_queue: mp.Queue):
                     break
             if not out_queue.full():
                 out_queue.put(
-                    Msg2Window(img=img, hp=s1.hp, heat=s1.heat, bat=s1.bat,
+                    Msg2Window(img=cv.transpose(img), hp=s1.hp, heat=s1.heat, bat=s1.bat,
                                aim_method=s1.aim_method, aim_target=s1.aim_target,
                                fps=(real_fps, max_fps)))
             else:
