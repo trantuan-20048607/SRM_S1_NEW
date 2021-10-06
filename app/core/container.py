@@ -21,11 +21,11 @@ class Container(object):
         msg_ctr_2_ui_queue = mp.Queue()
         ui_proc = mp.Process(target=ui.start,
                              args=(self.color, self.debug, msg_ctr_2_ui_queue,
-                                   msg_ui_2_ctr_queue),
+                                   msg_ui_2_ctr_queue, self.record),
                              name="ui")
         ctr_proc = mp.Process(target=controller.start,
                               args=(self.color, self.debug, msg_ui_2_ctr_queue,
-                                    msg_ctr_2_ui_queue),
+                                    msg_ctr_2_ui_queue, self.record),
                               name="controller")
         ui_proc.start()
         ctr_proc.start()

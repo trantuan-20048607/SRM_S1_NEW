@@ -6,18 +6,21 @@ import time
 import cv2 as cv
 
 from app.constants import *
+from app.controller.const import S1Robot
 from app.controller.main import *
-from app.controller.msg import *
 from app.ui.msg import *
 
 
-def start(color: str, debug: bool, in_queue: mp.Queue, out_queue: mp.Queue):
+def start(color: str, debug: bool, in_queue: mp.Queue, out_queue: mp.Queue, record: bool):
     assert color in COLOR_LIST
 
     logging.basicConfig(level={True: logging.DEBUG, False: logging.INFO}[debug],
                         filename="logs/controller.log", filemode="w",
                         format="%(asctime)s - %(pathname)s[line:%(lineno)d] - %(levelname)s: %(message)s")
     read_video = cv.VideoCapture("assets/s1%s.avi" % COLOR_ENEMY_LIST[color])
+    if record:
+        write_video = cv.VideoWriter(f'tmp/{time.strftime("%Y-%m-%d-%H-%M-%S", time.gmtime())}_s1{color}.avi',
+                                     cv.VideoWriter_fourcc(*'XVID'), CTR_FPS_LIMIT, (1280, 720), True)
     real_fps, max_fps = 0.0, 0.0
     s1 = S1Controller("S1", color, debug)
 
@@ -44,8 +47,10 @@ def start(color: str, debug: bool, in_queue: mp.Queue, out_queue: mp.Queue):
                     break
             else:
                 img = s1.img()
+                if not img:
+                    continue
             if not in_queue.empty():
-                msg: Msg2Controller = in_queue.get()
+                msg = in_queue.get()
                 s1.act(img, msg)
                 if s1.hp == 0:
                     terminate_window()
@@ -57,6 +62,34 @@ def start(color: str, debug: bool, in_queue: mp.Queue, out_queue: mp.Queue):
                                fps=(real_fps, max_fps)))
             else:
                 logging.warning("UI MSG QUEUE FULL")
+            if record:
+                cv.putText(img, "FPS %.0f/%d" % (real_fps, CTR_FPS_LIMIT),
+                           (0, 24), cv.FONT_HERSHEY_SIMPLEX,
+                           0.85, (0, 192, 0), 2)
+                cv.putText(img, "HP %d/%d" % (s1.hp, S1Robot.INITIAL_HP),
+                           (0, 48), cv.FONT_HERSHEY_SIMPLEX,
+                           0.85, (0, 192, 0) if s1.hp * 2 > S1Robot.INITIAL_HP else (10, 20, 160), 2)
+                cv.putText(img, "HEAT %d/%d" % (s1.heat, S1Robot.MAX_HEAT),
+                           (0, 72), cv.FONT_HERSHEY_SIMPLEX,
+                           0.85, (0, 192, 0) if s1.heat * 1.2 < S1Robot.MAX_HEAT else (10, 20, 160), 2)
+                if s1.speed != (0, 0):
+                    cv.putText(img, "MOVING",
+                               (0, 120), cv.FONT_HERSHEY_SIMPLEX,
+                               0.85, (50, 150, 250), 2)
+                if s1.aim_method != "manual":
+                    cv.putText(img, f"AUTO AIM: {AUTO_AIM_METHOD_NAME[s1.aim_method]}",
+                               (0, 96), cv.FONT_HERSHEY_SIMPLEX,
+                               0.85, (0, 192, 0), 2)
+                    cv.putText(img, f"{s1.aim_target[0]}, {s1.aim_target[1]}",
+                               (s1.aim_target[0] - 76, s1.aim_target[1] - 60), cv.FONT_HERSHEY_SIMPLEX,
+                               0.75, (0, 192, 0), 2)
+                    cv.rectangle(img, (s1.aim_target[0] - 80, s1.aim_target[1] - 80),
+                                 (s1.aim_target[0] + 80, s1.aim_target[1] + 80), (0, 192, 0), 2)
+                else:
+                    cv.putText(img, "MANUAL AIM",
+                               (0, 96), cv.FONT_HERSHEY_SIMPLEX,
+                               0.85, (50, 150, 250), 2)
+                write_video.write(img)
             max_fps = 1 / (time.time() - time_start)
             time.sleep(max((1.0 / CTR_FPS_LIMIT) - (time.time() - time_start), 0))
             real_fps = 1 / (time.time() - time_start)
@@ -67,3 +100,5 @@ def start(color: str, debug: bool, in_queue: mp.Queue, out_queue: mp.Queue):
             report_error()
             break
     read_video.release()
+    if record:
+        write_video.release()

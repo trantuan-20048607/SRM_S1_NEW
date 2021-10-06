@@ -4,3 +4,7 @@
 # Ignore Logs.
 /logs/*
 !/log/.keep
+
+# Ignore Temporaries.
+/tmp/*
+!/tmp/.keep

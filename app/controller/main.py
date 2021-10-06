@@ -26,6 +26,7 @@ class S1Controller(Controller):
         self.hp = S1Robot.INITIAL_HP
         self.heat = 0
         self.bat = 0
+        self.speed = (0, 0)
         self.cool_time = time.time()
         self.aim_method = DEFAULT_AIM_METHOD
         self.aim_target = (int(SCREEN_SIZE[0] / 2), int(SCREEN_SIZE[1] / 2))
@@ -106,13 +107,14 @@ class S1Controller(Controller):
     def _angle_callback(angle: tuple):
         return angle
 
-    def img(self) -> np.ndarray:
+    def img(self) -> np.ndarray or None:
         return self.s1.camera.read_cv2_image()
 
     def act(self, img: np.ndarray, msg: Msg2Controller):
         if msg.terminate:
             self.die()
             return
+        self.speed = msg.speed
         if not self.debug:
             self.s1.chassis.drive_speed(x=msg.speed[0], y=msg.speed[1], z=0, timeout=1)
             logging.debug(f"SPD CHG X{msg.speed[0]} Y{msg.speed[1]}")

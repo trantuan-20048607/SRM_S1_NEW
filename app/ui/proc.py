@@ -10,12 +10,12 @@ from app.ui.main import *
 from app.ui.msg import *
 
 
-def start(color: str, debug: bool, in_queue: mp.Queue, out_queue: mp.Queue):
+def start(color: str, debug: bool, in_queue: mp.Queue, out_queue: mp.Queue, record: bool):
     assert color in COLOR_LIST
 
     logging.basicConfig(level={True: logging.DEBUG, False: logging.INFO}[debug], filename="logs/ui.log", filemode="w",
                         format="%(asctime)s - %(pathname)s[line:%(lineno)d] - %(levelname)s: %(message)s")
-    window = Window(debug)
+    window = Window(debug, record)
     real_fps, max_fps = 0.0, 0.0
     msg = Msg2Window()
     while True:

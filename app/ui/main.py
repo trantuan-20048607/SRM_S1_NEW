@@ -21,7 +21,7 @@ class Window(object):
         K_a: (0, -1), K_d: (0, 1), K_w: (1, 0), K_s: (-1, 0)
     }
 
-    def __init__(self, debug: bool):
+    def __init__(self, debug: bool, record: bool):
         pygame.init()
         pygame.event.set_allowed([MOUSEBUTTONDOWN, KEYUP, KEYDOWN])
         pygame.event.set_blocked(MOUSEMOTION)
@@ -30,6 +30,7 @@ class Window(object):
         pygame.event.set_grab(True)
 
         self.debug = debug
+        self.record = record
         self.screen = pygame.display.set_mode(SCREEN_SIZE, flags=pygame.DOUBLEBUF)
         self.speed = (0, 0)
         self.cur_delta = (0, 0)
@@ -93,6 +94,8 @@ class Window(object):
                                        (10, 180, 10) if fps[0] * 2 > UI_FPS_LIMIT else (160, 20, 10)), (0, 0))
             self.screen.blit(ft.render("FPS CTR %.0f/%.0f" % msg.fps, True,
                                        (10, 180, 10) if msg.fps[0] * 2 > CTR_FPS_LIMIT else (160, 20, 10)), (0, 20))
+            if self.record:
+                self.screen.blit(ft.render("REC", True, (160, 20, 10)), (0, 40))
             ft = pygame.font.Font("assets/DVS.ttf", 30)
             self.screen.blit(ft.render(
                 f"HP {msg.hp}", True,
