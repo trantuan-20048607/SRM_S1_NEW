@@ -80,9 +80,9 @@ AUTO_AIM_MAGNIFICATION = (90, 15)
 
 # 色彩提取范围定义
 HSV_RANGE = {
-    "red": [(np.array([176, 112, 102]), np.array([180, 255, 255])),
-            (np.array([0, 112, 102]), np.array([8, 255, 255]))],
-    "blue": (np.array([90, 112, 102]), np.array([100, 255, 255]))
+    "red": [(np.array([172, 104, 94]), np.array([180, 255, 255])),
+            (np.array([0, 104, 94]), np.array([8, 255, 255]))],
+    "blue": (np.array([86, 104, 94]), np.array([104, 255, 255]))
 }
 
 # 参与识别的最小矩形面积
@@ -102,7 +102,7 @@ ROI_LIMIT = 128
 # --------------------
 
 # ROI 裁剪区域大小
-ROI_SIZE = (324, 324)
+ROI_SIZE = (300, 300)
 
 # 瞄准方式切换顺序
 AIM_METHOD_SELECT_LIST = {"manual": "tri",

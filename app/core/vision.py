@@ -83,6 +83,7 @@ def _ident_tgt(img, color):
             x, y, w, h = cv.boundingRect(contour)
             a = w * h
             if a > MIN_RECT_AREA:
+                cv.rectangle(img, (x, y), (x + w, y + h), (255, 255, 255), 2)
                 weight += a
                 center_x += x * a
                 center_y += y * a
