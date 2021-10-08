@@ -80,16 +80,16 @@ AUTO_AIM_MAGNIFICATION = (90, 15)
 
 # 色彩提取范围定义
 HSV_RANGE = {
-    "red": [(np.array([172, 104, 94]), np.array([180, 255, 255])),
-            (np.array([0, 104, 94]), np.array([8, 255, 255]))],
+    "red": [(np.array([172, 104, 72]), np.array([180, 255, 255])),
+            (np.array([0, 104, 72]), np.array([10, 255, 255]))],
     "blue": (np.array([86, 104, 94]), np.array([104, 255, 255]))
 }
 
 # 参与识别的最小矩形面积
-MIN_RECT_AREA = 16
+MIN_RECT_AREA = 92
 
 # 判定识别有效所需的面积总和
-MIN_VALID_TOTAL_AREA = 64
+MIN_VALID_TOTAL_AREA = 324
 
 # 灰度门限
 GRAY_THRESH = 16
