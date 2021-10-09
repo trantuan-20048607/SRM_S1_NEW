@@ -35,7 +35,7 @@ def start(color: str, debug: bool, in_queue: mp.Queue, out_queue: mp.Queue, reco
         out_queue.put(Msg2Window(
             img=cv.transpose(cv.imread("assets/ERR.jpg")), err=True))
 
-    while True:
+    while s1.hp > 0:
         try:
             time_start = time.time()
             if debug:
