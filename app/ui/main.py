@@ -172,7 +172,9 @@ class Window(object):
                 self._update_cur()
                 self.speed = speed
                 out_queue.put(Msg2Controller(speed=speed, cur_delta=self.cur_delta, aim_method=self.aim_method,
-                                             fire=event.type == MOUSEBUTTONDOWN, terminate=terminate))
+                                             fire=event.type == MOUSEBUTTONDOWN,
+                                             reset_auto_aim=(event.type == KEYDOWN and event.key == K_r),
+                                             terminate=terminate))
             else:
                 logging.warning("CTR MSG QUEUE FULL")
         if out_queue.empty():

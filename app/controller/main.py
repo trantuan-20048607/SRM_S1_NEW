@@ -122,6 +122,8 @@ class S1Controller(Controller):
             self.aim_method = msg.aim_method
             logging.info(f"AIM MTD CHG {self.aim_method.upper()}")
         if self.aim_method != "manual":
+            if msg.reset_auto_aim:
+                vision.reset()
             self.aim_target = vision.feed(img, color=COLOR_ENEMY_LIST[self.color], type_=self.aim_method)
             yaw = (self.aim_target[0] - int(SCREEN_SIZE[0] / 2)) / SCREEN_SIZE[0] * AUTO_AIM_MAGNIFICATION[0]
             pitch = (int(SCREEN_SIZE[1] / 2) - self.aim_target[1]) / SCREEN_SIZE[1] * AUTO_AIM_MAGNIFICATION[1]

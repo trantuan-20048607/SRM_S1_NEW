@@ -5,7 +5,7 @@ import cv2 as cv
 
 from app.constants import *
 
-__all__ = ["feed"]
+__all__ = ["feed", "reset"]
 
 _kalman = cv.KalmanFilter(4, 2)
 _last_pre = _current_pre = _last_mes = _current_mes = np.array([[SCREEN_SIZE[0] * 0.5],
@@ -45,7 +45,7 @@ def _tri_reset():
     _d_t = _d2_t = (SCREEN_SIZE[0] * 0.5, SCREEN_SIZE[1] * 0.5)
 
 
-def _reset():
+def reset():
     global _roi_enabled
 
     _roi_enabled = False
@@ -157,12 +157,12 @@ def feed(img: np.ndarray, color: str, type_: str = AIM_METHOD_SELECT_LIST[DEFAUL
     global _roi_enabled, _last_pre, _last_mes, _current_pre, _current_mes, _direct_target_data, _current_type
 
     if type_ != _current_type:
-        _reset()
+        reset()
         _current_type = type_
     last_x, last_y = _get_target_position(type_)
     if last_x > SCREEN_SIZE[0] or last_y > SCREEN_SIZE[1] or \
             last_x < 0 or last_y < 0:
-        _reset()
+        reset()
     elif last_x > SCREEN_SIZE[0] - ROI_LIMIT or last_y > SCREEN_SIZE[1] - ROI_LIMIT or \
             last_x < ROI_LIMIT or last_y < ROI_LIMIT:
         _roi_enabled = False

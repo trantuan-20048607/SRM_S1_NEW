@@ -10,6 +10,7 @@ class Msg2Controller(Msg):
                  cur_delta: tuple = (0, 0),
                  aim_method: str = DEFAULT_AIM_METHOD,
                  fire: bool = False,
+                 reset_auto_aim: bool = False,
                  terminate: bool = False):
         super(Msg2Controller, self).__init__()
 
@@ -19,4 +20,5 @@ class Msg2Controller(Msg):
         self.cur_delta = cur_delta
         self.aim_method = aim_method
         self.fire = fire
+        self.reset_auto_aim = reset_auto_aim
         self.terminate = terminate
