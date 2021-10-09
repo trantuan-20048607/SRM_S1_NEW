@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import itertools
+import math
 
 import cv2 as cv
 
@@ -14,6 +15,7 @@ _last_pre = _current_pre = _last_mes = _current_mes = np.array([[SCREEN_SIZE[0] 
 _d_t = _d2_t = (SCREEN_SIZE[0] * 0.5, SCREEN_SIZE[1] * 0.5)
 
 _direct_target_data = _direct_data_cache = (SCREEN_SIZE[0] * 0.5, SCREEN_SIZE[1] * 0.5)
+_target_weight = 0.0
 
 _roi_enabled = False
 _current_type = DEFAULT_AIM_METHOD
@@ -59,6 +61,8 @@ def _roi_cut_img(img, center, size):
 
 
 def _ident_tgt(img, color):
+    global _target_weight
+
     assert color in COLOR_LIST
 
     img_hsv = cv.cvtColor(img, cv.COLOR_BGR2HSV)
@@ -88,6 +92,7 @@ def _ident_tgt(img, color):
                 center_x += (x + w * 0.5) * a
                 center_y += (y + h * 0.5) * a
     if weight > MIN_VALID_TOTAL_AREA:
+        _target_weight = weight
         return center_x / weight, center_y / weight
     else:
         return None
@@ -176,10 +181,11 @@ def feed(img: np.ndarray, color: str, type_: str = AIM_METHOD_SELECT_LIST[DEFAUL
         else:
             return _get_target_position(type_)
     else:
-        _direct_target_data = _ident_tgt(_roi_cut_img(img, (last_x, last_y), ROI_SIZE), color)
+        roi_size = math.sqrt(_target_weight * 32)
+        _direct_target_data = _ident_tgt(_roi_cut_img(img, (last_x, last_y), (int(roi_size), int(roi_size))), color)
         if _direct_target_data:
-            _direct_target_data = (_direct_target_data[0] - ROI_SIZE[0] * 0.5 + last_x,
-                                   _direct_target_data[1] - ROI_SIZE[1] * 0.5 + last_y)
+            _direct_target_data = (_direct_target_data[0] - roi_size * 0.5 + last_x,
+                                   _direct_target_data[1] - roi_size * 0.5 + last_y)
             _smooth(_direct_target_data, type_)
             return _get_target_position(type_)
         else:

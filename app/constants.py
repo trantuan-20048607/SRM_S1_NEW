@@ -101,8 +101,8 @@ ROI_LIMIT = 128
 #    ⚪ 自瞄平滑设置 ⚪
 # --------------------
 
-# ROI 裁剪区域大小
-ROI_SIZE = (300, 300)
+# ROI 裁剪区域放大倍率
+ROI_ZOOM = 28
 
 # 瞄准方式切换顺序
 AIM_METHOD_SELECT_LIST = {"manual": "tri",
