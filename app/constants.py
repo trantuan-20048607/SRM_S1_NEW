@@ -50,7 +50,7 @@ QUEUE_BLOCK_THRESH = 2
 UI_FPS_LIMIT = 60
 
 # 限制控制器帧率
-CTR_FPS_LIMIT = 30
+CTR_FPS_LIMIT = 60
 
 # 准星类型: 0 关闭，1 十字，2 圆点
 FIRE_IND_TYPE = 1
@@ -66,7 +66,7 @@ FIRE_UI_SHOW_TIME = 6
 # --------------------
 
 # 手动瞄准灵敏度
-AIMING_MAGNIFICATION = (180, 30)
+AIMING_MAGNIFICATION = (180, 45)
 
 # 反转 Y 轴
 REVERSE_Y_AXIS = False

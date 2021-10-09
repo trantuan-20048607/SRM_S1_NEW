@@ -47,7 +47,7 @@ def start(color: str, debug: bool, in_queue: mp.Queue, out_queue: mp.Queue, reco
                     break
             else:
                 img = s1.img()
-                if not img:
+                if img is None:
                     continue
             if not in_queue.empty():
                 msg = in_queue.get()

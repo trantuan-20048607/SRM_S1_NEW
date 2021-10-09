@@ -85,8 +85,8 @@ def _ident_tgt(img, color):
             if a > MIN_RECT_AREA:
                 cv.rectangle(img, (x, y), (x + w, y + h), (255, 255, 255), 2)
                 weight += a
-                center_x += x * a
-                center_y += y * a
+                center_x += (x + w * 0.5) * a
+                center_y += (y + h * 0.5) * a
     if weight > MIN_VALID_TOTAL_AREA:
         return center_x / weight, center_y / weight
     else:
