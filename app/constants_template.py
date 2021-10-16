@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 
-import numpy as np
 from robomaster import led
 
 # --------------------
@@ -83,18 +82,13 @@ HIT_EFFECT = {
 # --------------------
 
 # 自动瞄准方式列表
-AUTO_AIM_METHOD_LIST = ("kalman", "tri", "direct")
+AUTO_AIM_METHOD_LIST = ("default",)
 
 # 各个自瞄方法的显示名称
-AUTO_AIM_METHOD_NAME = {"tri": "TRI FLT",
-                        "kalman": "KALMAN FLT",
-                        "direct": "NO FLT"}
+AUTO_AIM_METHOD_NAME = {"default": "DEFAULT (NO FLT)"}
 
 # 瞄准方式切换顺序
-AIM_METHOD_SELECT_LIST = {"manual": "tri",
-                          "kalman": "direct",
-                          "tri": "kalman",
-                          "direct": "tri"}
+AIM_METHOD_SELECT_LIST = {"manual": "default"}
 
 # 默认瞄准方式
 DEFAULT_AIM_METHOD = "manual"
@@ -115,36 +109,10 @@ REVERSE_Y_AXIS = False
 #    ⚪ 自瞄参数设置 ⚪
 # --------------------
 
-# 色彩提取范围定义
-HSV_RANGE = {
-    "red": [(np.array([172, 104, 72]), np.array([180, 255, 255])),
-            (np.array([0, 104, 72]), np.array([10, 255, 255]))],
-    "blue": (np.array([86, 104, 94]), np.array([104, 255, 255]))
-}
-
-# 参与识别的最小矩形面积
-MIN_RECT_AREA = 92
-
-# 判定识别有效所需的面积总和
-MIN_VALID_TOTAL_AREA = 324
-
-# 灰度门限
-GRAY_THRESH = 16
-
-# ROI 激活边界
-ROI_LIMIT = 128
+# 此处填写自瞄处理参数
 
 # --------------------
 #    ⚪ 自瞄平滑设置 ⚪
 # --------------------
 
-# ROI 裁剪区域放大倍率
-ROI_ZOOM = 28
-
-# KALMAN 滤波器参数，详见 README
-KALMAN_SHAKE_CONTROL = 1e-3
-KALMAN_DELAY_CONTROL = 1e-1
-
-# 差分反馈参数，详见 README
-TRIANGULAR_DIFFERENCE_WEIGHT = ((1, 2, 1), (2, 2, 1), (3, 1, 0))
-TRIANGULAR_SIDE_LEN_LEVEL = (24, 48)
+# 此处填写滤波器参数

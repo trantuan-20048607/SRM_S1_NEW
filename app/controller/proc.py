@@ -17,7 +17,7 @@ def start(color: str, debug: bool, in_queue: mp.Queue, out_queue: mp.Queue, reco
     logging.basicConfig(level={True: logging.DEBUG, False: logging.INFO}[debug],
                         filename="logs/controller.log", filemode="w",
                         format="%(asctime)s - %(pathname)s[line:%(lineno)d] - %(levelname)s: %(message)s")
-    read_video = cv.VideoCapture("assets/s1%s.avi" % COLOR_ENEMY_LIST[color])
+    read_video = cv.VideoCapture("assets/s1%s.avi" % ENEMY_COLOR[color])
     if record:
         write_video = cv.VideoWriter(f'tmp/{time.strftime("%Y-%m-%d-%H-%M-%S", time.gmtime())}_s1{color}.avi',
                                      cv.VideoWriter_fourcc(*'XVID'), CTR_FPS_LIMIT, (1280, 720), True)
@@ -41,7 +41,7 @@ def start(color: str, debug: bool, in_queue: mp.Queue, out_queue: mp.Queue, reco
             if debug:
                 ret, img = read_video.read()
                 if not ret:
-                    logging.debug("VIDEO ENDED")
+                    logging.debug("VIDEO END")
                     s1.die()
                     terminate_window()
                     break
