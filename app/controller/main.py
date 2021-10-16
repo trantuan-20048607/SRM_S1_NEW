@@ -117,11 +117,12 @@ class S1Controller(Controller):
         if msg.terminate:
             self.die()
             return
-        self.speed = msg.speed
-        if not self.debug:
-            self.s1.chassis.drive_speed(x=msg.speed[0], y=msg.speed[1], z=0, timeout=1)
+        if self.speed != msg.speed:
+            if not self.debug:
+                self.s1.chassis.drive_speed(x=msg.speed[0], y=msg.speed[1], z=0, timeout=1)
+            self.speed = msg.speed
             logging.debug(f"SPD CHG X{msg.speed[0]} Y{msg.speed[1]}")
-        if msg.aim_method != self.aim_method:
+        if self.aim_method != msg.aim_method:
             self.aim_method = msg.aim_method
             logging.info(f"AIM MTD CHG {self.aim_method.upper()}")
         if self.aim_method != "manual":
@@ -138,7 +139,7 @@ class S1Controller(Controller):
                 pitch = - pitch
         logging.info("ROT Y%.2f P%.2f" % (yaw, pitch))
         if not self.debug:
-            if msg.speed == (0, 0) and \
+            if self.speed == (0, 0) and \
                     yaw <= AIMING_DEAD_ZONE[0] and pitch <= AIMING_DEAD_ZONE[1]:
                 self.s1.set_robot_mode(mode=robot.GIMBAL_LEAD)
             if self.gimbal_action:

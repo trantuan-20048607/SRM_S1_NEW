@@ -151,7 +151,7 @@ class Window(object):
     def feedback(self, out_queue: mp.Queue):
         for event in pygame.event.get():
             if event.type == QUIT or event.type == KEYDOWN and event.key == K_ESCAPE:
-                if out_queue.full():
+                while not out_queue.empty():
                     _ = out_queue.get()
                 out_queue.put(Msg2Controller(terminate=True))
                 break
@@ -161,8 +161,7 @@ class Window(object):
                 if out_queue.full():
                     _ = out_queue.get()
                 self._update_cur()
-                out_queue.put(Msg2Controller(speed=self.speed,
-                                             cur_delta=self.cur_delta,
+                out_queue.put(Msg2Controller(cur_delta=self.cur_delta,
                                              aim_method=self.aim_method,
                                              reset_auto_aim=True))
             elif event.type == MOUSEBUTTONDOWN:
@@ -170,8 +169,7 @@ class Window(object):
                     _ = out_queue.get()
                 self._update_cur()
                 self.fire_show_delay = FIRE_UI_SHOW_TIME
-                out_queue.put(Msg2Controller(speed=self.speed,
-                                             cur_delta=self.cur_delta,
+                out_queue.put(Msg2Controller(cur_delta=self.cur_delta,
                                              aim_method=self.aim_method,
                                              fire=True))
             else:
