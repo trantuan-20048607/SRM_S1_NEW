@@ -187,7 +187,7 @@ def feed(img: np.ndarray, color: str, type_: str = AIM_METHOD_SELECT_LIST[DEFAUL
             return _get_target_position(type_)
     else:
         roi_size = math.sqrt(_target_weight * 32)
-        logging.debug(f"ROI SIZE {roi_size}x{roi_size}")
+        logging.debug("ROI SIZE %.2fx%.2f" % (roi_size, roi_size))
         _direct_target_data = _ident_tgt(_roi_cut_img(img, (last_x, last_y), (int(roi_size), int(roi_size))), color)
         if _direct_target_data:
             _direct_target_data = (_direct_target_data[0] - roi_size * 0.5 + last_x,
