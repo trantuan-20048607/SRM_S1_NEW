@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import itertools
+import logging
 import math
 
 import cv2 as cv
@@ -53,9 +54,11 @@ def reset():
     _roi_enabled = False
     _kalman_reset()
     _tri_reset()
+    logging.debug("AUTO AIM RESET")
 
 
 def _roi_cut_img(img, center, size):
+    logging.debug(f"ROI {size[0]}x{size[1]}")
     return img[max(int(center[1] - size[1] * 0.5), 0):min(int(center[1] + size[1] * 0.5), SCREEN_SIZE[1]),
            max(int(center[0] - size[0] * 0.5), 0):min(int(center[0] + size[0] * 0.5), SCREEN_SIZE[0])]
 
@@ -87,7 +90,7 @@ def _ident_tgt(img, color):
             x, y, w, h = cv.boundingRect(contour)
             a = w * h
             if a > MIN_RECT_AREA:
-                cv.rectangle(img, (x, y), (x + w, y + h), (255, 255, 255), 2)
+                cv.rectangle(img, (x, y), (x + w, y + h), UI_COLOR_NOTICE, 2)
                 weight += a
                 center_x += (x + w * 0.5) * a
                 center_y += (y + h * 0.5) * a
@@ -171,23 +174,29 @@ def feed(img: np.ndarray, color: str, type_: str = AIM_METHOD_SELECT_LIST[DEFAUL
     elif last_x > SCREEN_SIZE[0] - ROI_LIMIT or last_y > SCREEN_SIZE[1] - ROI_LIMIT or \
             last_x < ROI_LIMIT or last_y < ROI_LIMIT:
         _roi_enabled = False
+        logging.debug("ROI DISABLED")
 
     if not _roi_enabled:
         _direct_target_data = _ident_tgt(img, color)
         if _direct_target_data:
             _roi_enabled = True
+            logging.debug("ROI ENABLED")
             _smooth(_direct_target_data, type_)
             return _get_target_position(type_)
         else:
             return _get_target_position(type_)
     else:
         roi_size = math.sqrt(_target_weight * 32)
+        logging.debug(f"ROI SIZE {roi_size}x{roi_size}")
         _direct_target_data = _ident_tgt(_roi_cut_img(img, (last_x, last_y), (int(roi_size), int(roi_size))), color)
         if _direct_target_data:
             _direct_target_data = (_direct_target_data[0] - roi_size * 0.5 + last_x,
                                    _direct_target_data[1] - roi_size * 0.5 + last_y)
             _smooth(_direct_target_data, type_)
+            cv.rectangle(img, (int(last_x - roi_size * 0.5), int(last_y - roi_size * 0.5)),
+                         (int(last_x + roi_size * 0.5), int(last_y + roi_size * 0.5)), UI_COLOR_NOTICE, 2)
             return _get_target_position(type_)
         else:
             _roi_enabled = False
+            logging.debug("ROI DISABLED")
             return _get_target_position(type_)

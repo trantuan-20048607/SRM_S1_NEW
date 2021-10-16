@@ -15,11 +15,10 @@ def start(color: str, debug: bool, in_queue: mp.Queue, out_queue: mp.Queue, reco
 
     logging.basicConfig(level={True: logging.DEBUG, False: logging.INFO}[debug], filename="logs/ui.log", filemode="w",
                         format="%(asctime)s - %(pathname)s[line:%(lineno)d] - %(levelname)s: %(message)s")
-    window = Window(debug, record)
-    real_fps, max_fps = 0.0, 0.0
-    msg = Msg2Window()
+    window, real_fps, max_fps, msg = Window(debug, record), 0.0, 0.0, Msg2Window()
     while True:
         time_start = time.time()
+        logging.debug(f"I {in_queue.qsize()} O {out_queue.qsize()}")
         if not in_queue.empty():
             msg = in_queue.get()
             if msg.terminate:
@@ -31,6 +30,5 @@ def start(color: str, debug: bool, in_queue: mp.Queue, out_queue: mp.Queue, reco
         max_fps = 1.0 / (time.time() - time_start)
         time.sleep(max((1.0 / UI_FPS_LIMIT) - (time.time() - time_start), 0))
         real_fps = 1.0 / (time.time() - time_start)
-        logging.debug(f"I/O QUE SZ: {in_queue.qsize()}, {out_queue.qsize()}")
         logging.info("FPS %.2f %.2f" % (real_fps, max_fps))
     pygame.quit()

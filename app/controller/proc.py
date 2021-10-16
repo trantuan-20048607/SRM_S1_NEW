@@ -17,51 +17,43 @@ def start(color: str, debug: bool, in_queue: mp.Queue, out_queue: mp.Queue, reco
     logging.basicConfig(level={True: logging.DEBUG, False: logging.INFO}[debug],
                         filename="logs/controller.log", filemode="w",
                         format="%(asctime)s - %(pathname)s[line:%(lineno)d] - %(levelname)s: %(message)s")
-    read_video = cv.VideoCapture("assets/s1%s.avi" % ENEMY_COLOR[color])
+    if debug:
+        read_video = cv.VideoCapture("assets/s1%s.avi" % ENEMY_COLOR[color])
     if record:
         write_video = cv.VideoWriter(f'tmp/{time.strftime("%Y-%m-%d-%H-%M-%S", time.gmtime())}_s1{color}.avi',
                                      cv.VideoWriter_fourcc(*'XVID'), CTR_FPS_LIMIT, (1280, 720), True)
-    real_fps, max_fps = 0.0, 0.0
-    s1 = S1Controller("S1", color, debug)
+    real_fps, max_fps, s1 = 0.0, 0.0, S1Controller("S1", color, debug)
 
     def terminate_window():
-        if out_queue.full():
+        while not out_queue.empty():
             _ = out_queue.get()
         out_queue.put(Msg2Window(terminate=True))
 
     def report_error():
-        if out_queue.full():
+        while not out_queue.empty():
             _ = out_queue.get()
         out_queue.put(Msg2Window(
             img=cv.transpose(cv.imread("assets/ERR.jpg")), err=True))
 
-    while s1.hp > 0:
-        try:
+    try:
+        while s1.hp > 0:
             time_start = time.time()
             if debug:
                 ret, img = read_video.read()
                 if not ret:
-                    logging.debug("VIDEO END")
                     s1.die()
-                    terminate_window()
-                    break
             else:
                 img = s1.img()
-                if img is None:
-                    continue
+            if img is None:
+                continue
+            logging.debug(f"I {in_queue.qsize()} O {out_queue.qsize()}")
             if not in_queue.empty():
-                msg = in_queue.get()
-                s1.act(img, msg)
-                if s1.hp == 0:
-                    terminate_window()
-                    break
+                s1.act(img, in_queue.get())
             if not out_queue.full():
                 out_queue.put(
                     Msg2Window(img=cv.transpose(img), hp=s1.hp, heat=s1.heat, bat=s1.bat,
                                aim_method=s1.aim_method, aim_target=s1.aim_target,
                                fps=(real_fps, max_fps)))
-            else:
-                logging.warning("UI MSG QUEUE FULL")
             if record:
                 cv.putText(img, "FPS %.0f/%d" % (real_fps, CTR_FPS_LIMIT),
                            (0, 24), cv.FONT_HERSHEY_SIMPLEX,
@@ -94,11 +86,12 @@ def start(color: str, debug: bool, in_queue: mp.Queue, out_queue: mp.Queue, reco
             time.sleep(max((1.0 / CTR_FPS_LIMIT) - (time.time() - time_start), 0))
             real_fps = 1 / (time.time() - time_start)
             logging.info("FPS %.2f %.2f" % (real_fps, max_fps))
-        except Exception as e:
-            logging.error(e)
-            s1.die()
-            report_error()
-            break
-    read_video.release()
+        terminate_window()
+    except Exception as e:
+        logging.error(e)
+        s1.die()
+        report_error()
+    if debug:
+        read_video.release()
     if record:
         write_video.release()

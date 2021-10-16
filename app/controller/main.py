@@ -55,11 +55,13 @@ class S1Controller(Controller):
     def _modify_hp(self, hp):
         self.lock["hp"].acquire()
         self.hp = hp
+        logging.info(f"HP {self.hp} / {S1Robot.INITIAL_HP}")
         self.lock["hp"].release()
 
     def _modify_heat(self, heat):
         self.lock["heat"].acquire()
         self.heat = heat
+        logging.info(f"HEAT {self.heat}")
         self.lock["heat"].release()
 
     def _reset_cool_time(self):
@@ -70,12 +72,14 @@ class S1Controller(Controller):
     def _cool(self):
         while self.hp > 0:
             if 0.95 < time.time() - self.cool_time <= 1.05:
+                logging.info("COOLING")
                 self._reset_cool_time()
                 self._modify_heat(max(self.heat - S1Robot.COOL_HEAT, 0))
             time.sleep(0.1)
 
     def _bleed(self, tag):
         if tag == "hit":
+            logging.info("HIT")
             if self.hp <= S1Robot.HIT_DMG:
                 self.die()
             else:
@@ -92,6 +96,7 @@ class S1Controller(Controller):
                                         g=COLOR_RGB[self.color][1],
                                         b=COLOR_RGB[self.color][2], effect=led.EFFECT_ON)
         elif tag == "burn":
+            logging.info("BURNING")
             dmg = min(self.heat - S1Robot.MAX_HEAT, S1Robot.MAX_BURN_DMG)
             if self.hp <= dmg:
                 self.die()
@@ -150,6 +155,7 @@ class S1Controller(Controller):
                                                          pitch_speed=S1Robot.GIMBAL_SPEED_PITCH,
                                                          yaw_speed=S1Robot.GIMBAL_SPEED_YAW)
         if msg.fire:
+            logging.info("FIRE")
             if not self.debug:
                 self.s1.blaster.set_led(200)
                 self.s1.blaster.fire(blaster.INFRARED_FIRE, 1)
@@ -160,6 +166,7 @@ class S1Controller(Controller):
                 self._bleed(tag="burn")
 
     def die(self):
+        logging.info("DIE")
         self._modify_hp(0)
         if not self.debug:
             self.s1.chassis.drive_speed(x=0, y=0, z=0, timeout=1)

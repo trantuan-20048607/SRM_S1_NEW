@@ -72,6 +72,7 @@ class Window(object):
                 self.cur_delta = (cur_current[0] - int(SCREEN_SIZE[0] / 2),
                                   cur_current[1] - int(SCREEN_SIZE[1] / 2))
                 pygame.mouse.set_pos(int(SCREEN_SIZE[0] / 2), int(SCREEN_SIZE[1] / 2))
+                logging.debug("RESET CUR POS")
 
     def update(self, msg: Msg2Window, ui_queue_size: int, ctr_queue_size: int, fps: tuple):
         if msg.err:
@@ -180,17 +181,14 @@ class Window(object):
                     aim_method = {K_q: AIM_METHOD_SELECT_LIST[self.aim_method], K_e: "manual"}[event.key]
                 elif event.type == KEYUP and event.key in Window.SPEED_MAP:
                     speed = (speed[0] - Window.SPEED_MAP[event.key][0], speed[1] - Window.SPEED_MAP[event.key][1])
-                if self.speed != speed or self.aim_method != aim_method:
-                    if not out_queue.full():
-                        self._update_cur()
-                        self.speed = speed
-                        self.aim_method = aim_method
-                        pygame.mouse.set_visible(self.aim_method != "manual")
-                        out_queue.put(Msg2Controller(speed=self.speed,
-                                                     cur_delta=self.cur_delta,
-                                                     aim_method=self.aim_method))
-                    else:
-                        logging.warning("CTR MSG QUEUE FULL")
+                if (self.speed != speed or self.aim_method != aim_method) and not out_queue.full():
+                    self._update_cur()
+                    self.speed = speed
+                    self.aim_method = aim_method
+                    pygame.mouse.set_visible(self.aim_method != "manual")
+                    out_queue.put(Msg2Controller(speed=self.speed,
+                                                 cur_delta=self.cur_delta,
+                                                 aim_method=self.aim_method))
         if out_queue.empty():
             self._update_cur()
             out_queue.put(Msg2Controller(speed=self.speed,
