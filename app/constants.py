@@ -138,9 +138,6 @@ ROI_LIMIT = 128
 #    ⚪ 自瞄平滑设置 ⚪
 # --------------------
 
-# ROI 裁剪区域放大倍率
-ROI_ZOOM = 28
-
 # KALMAN 滤波器参数，详见 README
 KALMAN_SHAKE_CONTROL = 1e-3
 KALMAN_DELAY_CONTROL = 1e-1
