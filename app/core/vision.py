@@ -70,15 +70,10 @@ def _ident_tgt(img, color):
 
     img_hsv = cv.cvtColor(img, cv.COLOR_BGR2HSV)
     img_color = np.zeros(img.shape, dtype=np.uint8)
-    if color in HSV_RANGE and type(HSV_RANGE[color]) in (list, tuple):
-        if type(HSV_RANGE[color]) == tuple:
-            img_color = cv.bitwise_and(
-                img, img, mask=cv.inRange(
-                    img_hsv, HSV_RANGE[color][0], HSV_RANGE[color][1]))
-        else:
-            for lower, upper in HSV_RANGE[color]:
-                img_color = cv.add(img_color, cv.bitwise_and(
-                    img, img, mask=cv.inRange(img_hsv, lower, upper)))
+    if color in HSV_RANGE:
+        for lower, upper in HSV_RANGE[color]:
+            img_color = cv.add(img_color, cv.bitwise_and(
+                img, img, mask=cv.inRange(img_hsv, lower, upper)))
     else:
         img_color = img_hsv
     cv.medianBlur(img_color, 3, img_color)
@@ -91,11 +86,15 @@ def _ident_tgt(img, color):
             a = w * h
             if a > MIN_RECT_AREA:
                 cv.rectangle(img, (x, y), (x + w, y + h), UI_COLOR_NOTICE, 2)
+                cv.putText(img, "%d" % a, (x, y), cv.FONT_HERSHEY_COMPLEX, 0.4, (255, 255, 255))
                 weight += a
                 center_x += (x + w * 0.5) * a
                 center_y += (y + h * 0.5) * a
     if weight > MIN_VALID_TOTAL_AREA:
         _target_weight = weight
+        if img.shape[0] < SCREEN_SIZE[1] and img.shape[1] < SCREEN_SIZE[0]:
+            cv.putText(img, "%d %.2f%%" % (weight, 100 * weight / (img.shape[0] * img.shape[1])),
+                       (0, img.shape[0] - 2), cv.FONT_HERSHEY_COMPLEX, 0.5, (255, 255, 255))
         return center_x / weight, center_y / weight
     else:
         return None

@@ -136,10 +136,6 @@ class Window(object):
             if msg.aim_method == "manual":
                 self._draw_indicator(int(SCREEN_SIZE[0] / 2), int(SCREEN_SIZE[1] / 2), self.fire_indicator_type)
             else:
-                self.screen.blit(pygame.font.Font(UI_FONT, 16).render(
-                    f"{int(msg.aim_target[0] - SCREEN_SIZE[0] / 2)},{int(msg.aim_target[1] - SCREEN_SIZE[1] / 2)}",
-                    True, UI_COLOR_NORMAL
-                ), (msg.aim_target[0] - 60, msg.aim_target[1] - 60))
                 self.cur_delta = (msg.aim_target[0] - self.last_aim_target[0],
                                   msg.aim_target[1] - self.last_aim_target[1])
                 self._draw_indicator(msg.aim_target[0], msg.aim_target[1], 2)

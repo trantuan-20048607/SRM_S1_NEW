@@ -119,7 +119,7 @@ REVERSE_Y_AXIS = False
 HSV_RANGE = {
     "red": [(np.array([172, 104, 72]), np.array([180, 255, 255])),
             (np.array([0, 104, 72]), np.array([10, 255, 255]))],
-    "blue": (np.array([86, 104, 94]), np.array([104, 255, 255]))
+    "blue": [(np.array([86, 104, 94]), np.array([104, 255, 255]))]
 }
 
 # 参与识别的最小矩形面积
