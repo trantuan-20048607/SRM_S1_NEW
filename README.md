@@ -8,6 +8,7 @@
 
 ### 更新记录 ###
 
+- `2021.10.17` 添加测试模块
 - `2021.10.16` 重构；添加了自定义模板
 - `2021.10.9` 修复了一个严重 BUG；界面优化
 - `2021.10.6` 修改了视频录制方法
@@ -97,6 +98,9 @@ SRM_S1_NEW
 │   ├───benchmark     # 性能测试
 │   │   ├───timer.py       # 简易计时器
 │   │   └───cpu_usage.py   # 详细计时器
+│   ├───test          # 逻辑测试
+│   │   ├───vision.py      # 视觉测试模块
+│   │   └───vision_template.py  # 视觉测试模板
 │   ├───ui            # 界面
 │   │   ├───proc.py        # 界面进程
 │   │   ├───main.py        # 功能实现
@@ -104,6 +108,7 @@ SRM_S1_NEW
 │   ├───constants_template.py   # 常量模板
 │   └───constants.py  # 常量定义
 ├───logs     # 日志
+├───test.py  # 测试入口
 └───main.py  # 程序入口
 ```
 
@@ -151,10 +156,15 @@ SRM_S1_NEW
     - `KALMAN_SHAKE_CONTROL`：其默认值为 `1e-3`，此值越小，抖动越大，延迟越小；
     - `KALMAN_DELAY_CONTROL`：其默认值为 `1e-1`，此值越小，抖动越小，延迟越大。
 
+### 自动瞄准测试 ###
+
+框架自带使用 OpenCV 监控自瞄状态的测试例程，输入 `python test.py --vision --[color]` 运行测试，按 `Q` 键退出。
+
 ### 二次开发 ###
 
 若不需要自带的自动瞄准，复制 `/app/constants_template.py` 覆盖 `/app/constants.py`， 复制 `/app/core/vision_template.py`
-覆盖 `/app/core/vision.py`，参考两个模板文件的注释自行编写自动瞄准代码。
+覆盖 `/app/core/vision.py`，参考两个模板文件的注释自行编写自动瞄准代码。若需要使用自动瞄准测试模块，复制 `/app/test/vision_template.py`
+覆盖 `/app/test/vision.py` 并参考注释自行修改。
 
 ### 性能测试 ###
 

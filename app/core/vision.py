@@ -7,7 +7,7 @@ import cv2 as cv
 
 from app.constants import *
 
-__all__ = ["feed", "reset"]
+__all__ = ["feed", "reset", "modify_hsv_range"]
 
 _kalman = cv.KalmanFilter(4, 2)
 _last_pre = _current_pre = _last_mes = _current_mes = np.array([[SCREEN_SIZE[0] * 0.5],
@@ -20,6 +20,10 @@ _target_weight = 0.0
 
 _roi_enabled = False
 _current_type = DEFAULT_AIM_METHOD
+
+
+def modify_hsv_range(color: str, i: int, j: int, k: int, x: int):
+    HSV_RANGE[color][i][j][k] = x
 
 
 def _kalman_reset():
