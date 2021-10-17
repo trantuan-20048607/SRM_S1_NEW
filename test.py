@@ -14,12 +14,12 @@ if __name__ == "__main__":
     args = parser.parse_args()
     logging.basicConfig(level=logging.DEBUG, filename="logs/test.log", filemode="w",
                         format="%(asctime)s - %(pathname)s[line:%(lineno)d] - %(levelname)s: %(message)s")
+    color = ""
+    for col in COLOR_LIST:
+        assert color == ""
+        if eval(f"args.{col}"):
+            color = col
+            break
+    assert color != ""
     if args.vision:
-        color = ""
-        for col in COLOR_LIST:
-            assert color == ""
-            if eval(f"args.{col}"):
-                color = col
-                break
-        assert color != ""
         vision.start(color)
