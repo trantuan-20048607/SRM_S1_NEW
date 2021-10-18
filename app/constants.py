@@ -8,6 +8,7 @@ from robomaster import led
 # --------------------
 
 # 队列阻塞阈值
+# 某个队列内消息超过该数量时，将在界面上警告延迟
 QUEUE_BLOCK_THRESH = 2
 
 # 限制显示帧率
@@ -26,9 +27,11 @@ SCREEN_SIZE = (1280, 720)
 # 窗口标题
 WINDOW_TITLE = "SRM 校内赛"
 
-# 字体文件
+# 用于 UI 的字体文件
+# 若要修改此参数，请勿删除默认的 assets/DVS.ttf，该字体用于内置的报错提示
 UI_FONT = "assets/DVS.ttf"
 
+# UI 颜色，使用 RGB 表示
 # UI 警报颜色
 UI_COLOR_WARNING = (160, 20, 10)
 
@@ -54,25 +57,25 @@ FIRE_UI_SHOW_TIME = 6
 # 已知颜色
 COLOR_LIST = ("red", "blue")
 
-# 颜色敌对关系
+# 敌人的颜色
 ENEMY_COLOR = {
     "red": "blue",
     "blue": "red"
 }
 
-# 颜色定义
+# LED 颜色定义
 COLOR_RGB = {
     "red": (255, 0, 0),
     "blue": (0, 0, 255)
 }
 
-# 副颜色定义
+# LED 副颜色定义
 SUB_COLOR_RGB = {
     "red": COLOR_RGB["blue"],
     "blue": COLOR_RGB["red"]
 }
 
-# 击打特效定义
+# 被击打特效定义
 HIT_EFFECT = {
     "red": led.EFFECT_OFF,
     "blue": led.EFFECT_FLASH
@@ -83,20 +86,23 @@ HIT_EFFECT = {
 # --------------------
 
 # 自动瞄准方式列表
+# 在此处列出所有自动瞄准方法，手动瞄准默认为 "manual" 且不可修改
 AUTO_AIM_METHOD_LIST = ("kalman", "tri", "direct")
 
 # 各个自瞄方法的显示名称
+# 请勿写成中文，否则录制视频时（OpenCV）将无法显示名称
 AUTO_AIM_METHOD_NAME = {"tri": "TRI FLT",
                         "kalman": "KALMAN FLT",
                         "direct": "NO FLT"}
 
 # 瞄准方式切换顺序
+# 处于左边的模式时，按下 Q 切换至右边模式，确保每一个模式都有对应的切换目标
 AIM_METHOD_SELECT_LIST = {"manual": "tri",
                           "kalman": "direct",
                           "tri": "kalman",
                           "direct": "tri"}
 
-# 默认瞄准方式
+# 默认瞄准方式，建议选择手动
 DEFAULT_AIM_METHOD = "manual"
 
 # 瞄准死区
@@ -108,7 +114,7 @@ MANUAL_AIM_SENSITIVITY = (180, 45)
 # 自动瞄准灵敏度
 AUTO_AIM_SENSITIVITY = (90, 15)
 
-# 反转 Y 轴
+# 反转 Y 轴，用于鼠标模拟摇杆操作
 REVERSE_Y_AXIS = False
 
 # --------------------

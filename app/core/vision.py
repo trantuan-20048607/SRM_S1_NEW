@@ -23,8 +23,9 @@ _current_type = DEFAULT_AIM_METHOD
 
 
 def modify_hsv_range(color: str, i: int, j: int, k: int, x: int):
-    HSV_RANGE[color][i][j][k] = x
-    logging.debug(f"HSV {i} {j} {k} {x}")
+    if HSV_RANGE[color][i][j][k] != x:
+        HSV_RANGE[color][i][j][k] = x
+        logging.debug(f"HSV {i} {j} {k} {x}")
 
 
 def _kalman_reset():
