@@ -64,7 +64,6 @@ def reset():
 
 
 def _roi_cut_img(img, center, size):
-    logging.debug(f"ROI {size[0]}x{size[1]}")
     return img[max(int(center[1] - size[1] * 0.5), 0):min(int(center[1] + size[1] * 0.5), SCREEN_SIZE[1]),
            max(int(center[0] - size[0] * 0.5), 0):min(int(center[0] + size[0] * 0.5), SCREEN_SIZE[0])]
 
