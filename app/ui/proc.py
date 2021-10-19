@@ -27,8 +27,8 @@ def start(color: str, debug: bool, in_queue: mp.Queue, out_queue: mp.Queue, reco
         if msg.err:
             break
         window.feedback(out_queue)
-        max_fps = 1.0 / (time.time() - time_start)
+        max_fps = 1.0 / max((time.time() - time_start), 1e-4)
         time.sleep(max((1.0 / UI_FPS_LIMIT) - (time.time() - time_start), 0))
-        real_fps = 1.0 / (time.time() - time_start)
+        real_fps = 1.0 / max((time.time() - time_start), 1e-4)
         logging.info("FPS %.2f %.2f" % (real_fps, max_fps))
     pygame.quit()

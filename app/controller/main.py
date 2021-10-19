@@ -41,9 +41,9 @@ class S1Controller(Controller):
             self.s1.initialize(conn_type="ap", proto_type="udp")
             self.s1.set_robot_mode(mode=robot.GIMBAL_LEAD)
             self.s1.led.set_led(comp=led.COMP_ALL,
-                                r=COLOR_RGB[color][0],
-                                g=COLOR_RGB[color][1],
-                                b=COLOR_RGB[color][2], effect=led.EFFECT_ON)
+                                r=COLOR[color][0],
+                                g=COLOR[color][1],
+                                b=COLOR[color][2], effect=led.EFFECT_ON)
             self.s1.camera.start_video_stream(display=False)
             self.s1.armor.sub_ir_event(callback=self._ir_hit_callback)
             self.s1.battery.sub_battery_info(freq=5, callback=self._battery_callback)
@@ -86,15 +86,15 @@ class S1Controller(Controller):
                 self._modify_hp(self.hp - S1Robot.HIT_DMG)
                 if not self.debug:
                     self.s1.led.set_led(comp=led.COMP_ALL,
-                                        r=SUB_COLOR_RGB[self.color][0],
-                                        g=SUB_COLOR_RGB[self.color][1],
-                                        b=SUB_COLOR_RGB[self.color][2],
+                                        r=SUB_COLOR[self.color][0],
+                                        g=SUB_COLOR[self.color][1],
+                                        b=SUB_COLOR[self.color][2],
                                         effect=HIT_EFFECT[self.color])
                     time.sleep(0.03)
                     self.s1.led.set_led(comp=led.COMP_ALL,
-                                        r=COLOR_RGB[self.color][0],
-                                        g=COLOR_RGB[self.color][1],
-                                        b=COLOR_RGB[self.color][2], effect=led.EFFECT_ON)
+                                        r=COLOR[self.color][0],
+                                        g=COLOR[self.color][1],
+                                        b=COLOR[self.color][2], effect=led.EFFECT_ON)
         elif tag == "burn":
             logging.info("BURNING")
             dmg = min(self.heat - S1Robot.MAX_HEAT, S1Robot.MAX_BURN_DMG)
@@ -171,9 +171,9 @@ class S1Controller(Controller):
         if not self.debug:
             self.s1.chassis.drive_speed(x=0, y=0, z=0, timeout=1)
             self.s1.led.set_led(comp=led.COMP_ALL,
-                                r=SUB_COLOR_RGB[self.color][0],
-                                g=SUB_COLOR_RGB[self.color][1],
-                                b=SUB_COLOR_RGB[self.color][2],
+                                r=SUB_COLOR[self.color][0],
+                                g=SUB_COLOR[self.color][1],
+                                b=SUB_COLOR[self.color][2],
                                 effect=led.EFFECT_FLASH,
                                 freq=1)
             self.s1.camera.stop_video_stream()

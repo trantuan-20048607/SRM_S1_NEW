@@ -34,7 +34,10 @@ class Window(object):
         self.screen = pygame.display.set_mode(SCREEN_SIZE, flags=pygame.DOUBLEBUF)
         self.speed = (0, 0)
         self.cur_delta = (0, 0)
-        self.show_delay = {"fire": 0, "terminate": False}
+        self.show_delay = {"fire": 0,
+                           "terminate": False,
+                           "ui_queue_empty": 0,
+                           "ctr_queue_empty": 0}
         self.fire_indicator_type = FIRE_IND_TYPE
         self.aim_method = DEFAULT_AIM_METHOD
         self.last_aim_target = (int(SCREEN_SIZE[0] * 0.5), int(SCREEN_SIZE[1] * 0.5))
@@ -130,8 +133,20 @@ class Window(object):
                                            True, UI_COLOR_NORMAL), (96, 112))
             if ui_queue_size > QUEUE_BLOCK_THRESH:
                 self.screen.blit(ft.render("UI", True, UI_COLOR_WARNING), (96, 160))
+            elif ui_queue_size == 0:
+                self.show_delay["ui_queue_empty"] += 1
+                if self.show_delay["ui_queue_empty"] > QUEUE_BLOCK_THRESH:
+                    self.screen.blit(ft.render("UI", True, UI_COLOR_NOTICE), (192, 160))
+            else:
+                self.show_delay["ui_queue_empty"] = 0
             if ctr_queue_size > QUEUE_BLOCK_THRESH:
                 self.screen.blit(ft.render("CTR", True, UI_COLOR_WARNING), (192, 160))
+            elif ui_queue_size == 0:
+                self.show_delay["ctr_queue_empty"] += 1
+                if self.show_delay["ctr_queue_empty"] > QUEUE_BLOCK_THRESH:
+                    self.screen.blit(ft.render("CTR", True, UI_COLOR_NOTICE), (192, 160))
+            else:
+                self.show_delay["ctr_queue_empty"] = 0
             if pygame.mouse.get_pos() != (int(SCREEN_SIZE[0] / 2), int(SCREEN_SIZE[1] / 2)) \
                     and msg.aim_method == "manual":
                 self.screen.blit(ft.render("A", True, UI_COLOR_WARNING), (160, 256))

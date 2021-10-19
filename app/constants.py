@@ -64,15 +64,15 @@ ENEMY_COLOR = {
 }
 
 # LED 颜色定义
-COLOR_RGB = {
+COLOR = {
     "red": (255, 0, 0),
     "blue": (0, 0, 255)
 }
 
 # LED 副颜色定义
-SUB_COLOR_RGB = {
-    "red": COLOR_RGB["blue"],
-    "blue": COLOR_RGB["red"]
+SUB_COLOR = {
+    "red": COLOR["blue"],
+    "blue": COLOR["red"]
 }
 
 # 被击打特效定义
