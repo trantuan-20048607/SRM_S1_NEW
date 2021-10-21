@@ -5,7 +5,7 @@ import time
 
 from robomaster import *
 
-from app.constants import *
+from app.config import *
 from app.controller.const import S1Robot
 from app.controller.msg import *
 from app.core import vision

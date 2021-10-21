@@ -5,7 +5,7 @@ import time
 import cv2 as cv
 
 import app.core.vision as vision
-from app.constants import *
+from app.config import *
 
 
 def start(color: str):

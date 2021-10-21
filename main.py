@@ -2,7 +2,7 @@
 import argparse
 import logging
 
-from app.constants import *
+from app.config import *
 from app.core.container import *
 
 if __name__ == "__main__":

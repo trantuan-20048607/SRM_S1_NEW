@@ -8,7 +8,7 @@ import cv2 as cv
 import pygame
 from pygame.locals import *
 
-from app.constants import *
+from app.config import *
 from app.controller.const import S1Robot
 from app.controller.msg import *
 from app.ui.msg import *
@@ -136,12 +136,12 @@ class Window(object):
             elif ui_queue_size == 0:
                 self.show_delay["ui_queue_empty"] += 1
                 if self.show_delay["ui_queue_empty"] > QUEUE_BLOCK_THRESH:
-                    self.screen.blit(ft.render("UI", True, UI_COLOR_NOTICE), (192, 160))
+                    self.screen.blit(ft.render("UI", True, UI_COLOR_NOTICE), (96, 160))
             else:
                 self.show_delay["ui_queue_empty"] = 0
             if ctr_queue_size > QUEUE_BLOCK_THRESH:
                 self.screen.blit(ft.render("CTR", True, UI_COLOR_WARNING), (192, 160))
-            elif ui_queue_size == 0:
+            elif ctr_queue_size == 0:
                 self.show_delay["ctr_queue_empty"] += 1
                 if self.show_delay["ctr_queue_empty"] > QUEUE_BLOCK_THRESH:
                     self.screen.blit(ft.render("CTR", True, UI_COLOR_NOTICE), (192, 160))

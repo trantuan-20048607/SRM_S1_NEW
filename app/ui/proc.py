@@ -5,7 +5,7 @@ import time
 
 import pygame
 
-from app.constants import *
+from app.config import *
 from app.ui.main import *
 from app.ui.msg import *
 

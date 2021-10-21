@@ -78,16 +78,15 @@ $ pip install -r ./requirements.txt
 
 ```
 SRM_S1_NEW
-├───assets   # 资源文件
+├───assets     # 资源文件
 │   ├───*.ttf  # 字体
 │   ├───*.jpg  # 图片
 │   └───*.avi  # 视频
-├───app      # 主代码
+├───app        # 主代码
 │   ├───core          # 核心框架
 │   │   ├───msg.py         # 消息基类
 │   │   ├───container.py   # 容器类
 │   │   ├───vision.py      # 图像处理函数
-│   │   ├───vision_template.py  # 视觉模板
 │   │   └───controller.py  # 控制器基类
 │   ├───controller    # 控制器
 │   │   ├───const          # 机器人参数
@@ -98,15 +97,15 @@ SRM_S1_NEW
 │   ├───benchmark     # 性能测试
 │   │   ├───timer.py       # 简易计时器
 │   │   └───cpu_usage.py   # 详细计时器
-│   ├───test          # 逻辑测试
-│   │   ├───vision.py      # 视觉测试模块
-│   │   └───vision_template.py  # 视觉测试模板
+│   ├───test          # 功能测试
+│   │   └───vision.py      # 视觉测试模块
 │   ├───ui            # 界面
 │   │   ├───proc.py        # 界面进程
 │   │   ├───main.py        # 功能实现
 │   │   └───msg.py         # 消息封装
-│   ├───constants_template.py   # 常量模板
-│   └───constants.py  # 常量定义
+│   ├───template      # 二次开发模板
+│   │   └───...            # 此处内容请参考 README
+│   └───config.py     # 设置
 ├───logs     # 日志
 ├───test.py  # 测试入口
 └───main.py  # 程序入口
@@ -134,7 +133,7 @@ SRM_S1_NEW
 
 ### 自定义常数 ###
 
-所有常数配置均在文件 `/app/constants.py` 中，内附中文注释，可自行查看并修改。
+所有常数配置均在文件 `/app/config.py` 中，内附中文注释，可自行查看并修改。
 
 ### 自瞄平滑处理 ###
 
@@ -162,9 +161,7 @@ SRM_S1_NEW
 
 ### 二次开发 ###
 
-若不需要自带的自动瞄准，复制 `/app/constants_template.py` 覆盖 `/app/constants.py`， 复制 `/app/core/vision_template.py`
-覆盖 `/app/core/vision.py`，参考两个模板文件的注释自行编写自动瞄准代码。若需要使用自动瞄准测试模块，复制 `/app/test/vision_template.py`
-覆盖 `/app/test/vision.py` 并参考注释自行修改。
+用于二次开发的模板文件全部位于 `/app/template` 中，目录结构与 `/app` 完全相同，请根据其中模板文件内的 `TODO` 注释自行编写代码。
 
 ### 性能测试 ###
 

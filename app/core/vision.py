@@ -5,7 +5,7 @@ import math
 
 import cv2 as cv
 
-from app.constants import *
+from app.config import *
 
 __all__ = ["feed", "reset", "modify_hsv_range"]
 

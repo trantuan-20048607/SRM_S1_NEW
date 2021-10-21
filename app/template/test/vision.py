@@ -5,7 +5,7 @@ import time
 import cv2 as cv
 
 import app.core.vision as vision
-from app.constants import *
+from app.config import *
 
 
 def start(color: str):
@@ -16,7 +16,7 @@ def start(color: str):
     # 初始化数值
     max_fps, real_fps, cost = 0.0, 0.0, 0.0
 
-    # 此处填写测试环境预处理代码
+    # TODO 此处填写测试环境初始化代码
 
     while True:
         time_start = time.time()
@@ -37,15 +37,17 @@ def start(color: str):
                            (0, 48), cv.FONT_HERSHEY_SIMPLEX,
                            0.85, (0, 192, 0), 2)
 
-                # 窗口生成
+                # TODO 此处更改窗口标题
                 cv.imshow("VISION MODULE TEST", img)
 
-        # 此处填写对每一帧执行的测试代码
+        # TODO 此处填写对每一帧执行的测试代码
 
         cost = time.time() - time_start
         max_fps = 1.0 / max((time.time() - time_start), 1e-4)
         k = cv.waitKey(max(int(1000.0 / CTR_FPS_LIMIT) - int(1000 * (time.time() - time_start)), 0)) & 0xFF
         real_fps = 1.0 / max((time.time() - time_start), 1e-4)
+
+        # TODO 此处可自定义按键操作
         if k == ord('q'):
             break
         elif k == ord('r'):

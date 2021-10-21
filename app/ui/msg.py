@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import cv2 as cv
 
-from app.constants import *
+from app.config import *
 from app.core.msg import *
 
 __all__ = ["Msg2Window"]

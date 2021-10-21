@@ -3,7 +3,7 @@ import multiprocessing as mp
 
 import app.controller.proc as controller
 import app.ui.proc as ui
-from app.constants import *
+from app.config import *
 
 __all__ = ["Container"]
 
