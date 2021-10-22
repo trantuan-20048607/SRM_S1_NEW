@@ -1,4 +1,8 @@
 # -*- coding: utf-8 -*-
+"""
+S1 Framework for SRM Intramural Competition
+"""
+
 import argparse
 import logging
 
