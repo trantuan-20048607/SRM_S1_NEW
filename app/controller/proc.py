@@ -21,7 +21,7 @@ def start(color: str, debug: bool, in_queue: mp.Queue, out_queue: mp.Queue, reco
         read_video = cv.VideoCapture("assets/s1%s.avi" % ENEMY_COLOR[color])
     if record:
         write_video = cv.VideoWriter(f'tmp/{time.strftime("%Y-%m-%d-%H-%M-%S", time.gmtime())}_s1{color}.avi',
-                                     cv.VideoWriter_fourcc(*'XVID'), CTR_FPS_LIMIT, (1280, 720), True)
+                                     cv.VideoWriter_fourcc(*'XVID'), CTR_FPS_LIMIT, SCREEN_SIZE, True)
     real_fps, max_fps, s1 = 0.0, 0.0, S1Controller("S1", color, debug)
 
     def terminate_window():
