@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+
 COOL_HEAT = 15
 FIRE_HEAT = 25
 GIMBAL_SPEED_PITCH = 100

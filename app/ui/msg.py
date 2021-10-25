@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+
 import cv2 as cv
 
 from app.config import *

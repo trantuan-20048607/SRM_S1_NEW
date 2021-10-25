@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+
 import multiprocessing as mp
 
 import app.controller.proc as controller

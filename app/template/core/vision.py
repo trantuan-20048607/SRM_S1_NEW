@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 
+import numpy as np
+
 from app.config import *
 
 __all__ = ["feed", "reset"]

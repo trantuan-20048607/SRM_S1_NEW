@@ -1,6 +1,14 @@
 # -*- coding: utf-8 -*-
 """
-S1 Framework for SRM Intramural Competition
+  ***********************************************
+  * S1 Framework for SRM Intramural Competition *
+  *          Python 3 OpenCV Edition            *
+  ***********************************************
+
+Version: 1.0.0
+Author: Tran Tuan
+Email: chenjun6403@163.com
+
 """
 
 import argparse
@@ -30,5 +38,6 @@ if __name__ == "__main__":
     logging.basicConfig(level={True: logging.DEBUG, False: logging.INFO}[args.debug],
                         filename="logs/app.log", filemode="w",
                         format="%(asctime)s - %(pathname)s[line:%(lineno)d] - %(levelname)s: %(message)s")
+
     app = Container(color, args.debug, args.record)
     app.start()

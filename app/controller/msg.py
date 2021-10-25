@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+
 from app.config import *
 from app.core.msg import *
 
