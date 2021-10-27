@@ -10,7 +10,7 @@ from app.config import *
 
 def start(color: str):
     read_video, play_video = cv.VideoCapture(f"assets/s1{color}.avi"), True
-    ret, img = read_video.read()
+    ret, img_ = read_video.read()
 
     # 初始化数值
     max_fps, real_fps, cost = 0.0, 0.0, 0.0
@@ -30,24 +30,24 @@ def start(color: str):
     while ret:
         time_start = time.time()
 
-        img_ = img.copy()
+        img = img_.copy()
 
         # 目标位置
-        _ = vision.feed(img_, color)
+        _ = vision.feed(img, color)
 
         # 显示 FPS
-        cv.putText(img_, "FPS %d/%d" % (int(real_fps), int(max_fps)) if
+        cv.putText(img, "FPS %d/%d" % (int(real_fps), int(max_fps)) if
         max_fps < 1e4 else "FPS %d/INF" % int(real_fps),
                    (0, 24), cv.FONT_HERSHEY_SIMPLEX,
                    0.85, (0, 192, 0), 2)
 
         # 显示时间开销
-        cv.putText(img_, "COST %.5f" % cost,
+        cv.putText(img, "COST %.5f" % cost,
                    (0, 48), cv.FONT_HERSHEY_SIMPLEX,
                    0.85, (0, 192, 0), 2)
 
         # 窗口生成
-        cv.imshow("VISION MODULE TEST", img_)
+        cv.imshow("VISION MODULE TEST", img)
 
         for i in range(len(HSV_RANGE[color])):
             for j in range(3):
@@ -67,7 +67,7 @@ def start(color: str):
             play_video = not play_video
 
         if play_video:
-            ret, img = read_video.read()
+            ret, img_ = read_video.read()
         else:
             vision.reset()
     cv.destroyAllWindows()

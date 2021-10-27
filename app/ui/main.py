@@ -166,12 +166,13 @@ class Window(object):
             if self.show_delay["fire"] > 0:
                 self.screen.blit(ft.render("F", True, UI_COLOR_WARNING), (224, 256))
                 self.show_delay["fire"] -= 1
-            elif msg.aim_method != "manual":
-                dist = (msg.aim_target[0] - SCREEN_SIZE[0] / 2) * (msg.aim_target[0] - SCREEN_SIZE[0] / 2) + \
-                       (msg.aim_target[1] - SCREEN_SIZE[1] / 2) * (msg.aim_target[1] - SCREEN_SIZE[1] / 2)
-                if dist <= 6:
+            elif msg.aim_method != "manual" and self.auto_aim_take_effect:
+                dist = math.sqrt(
+                    (msg.aim_target[0] - SCREEN_SIZE[0] / 2) * (msg.aim_target[0] - SCREEN_SIZE[0] / 2) +
+                    (msg.aim_target[1] - SCREEN_SIZE[1] / 2) * (msg.aim_target[1] - SCREEN_SIZE[1] / 2))
+                if dist <= 72:
                     self.screen.blit(ft.render(
-                        "F", True, UI_COLOR_NORMAL if dist <= 2 and self.speed == (0, 0) else UI_COLOR_NOTICE),
+                        "F", True, UI_COLOR_NORMAL if dist <= 48 and self.speed == (0, 0) else UI_COLOR_NOTICE),
                         (224, 256))
             if self.speed != (0, 0):
                 self.screen.blit(ft.render("M", True, UI_COLOR_WARNING), (96, 256))
@@ -195,7 +196,7 @@ class Window(object):
                     _ = out_queue.get()
                 self.show_delay["terminate"] = True
                 out_queue.put(Msg2Controller(terminate=True))
-                break
+                return
             elif event.type == KEYDOWN and event.key == K_i and self.aim_method == "manual":
                 self.fire_indicator_type = (self.fire_indicator_type + 1) % 3
             elif event.type == KEYDOWN and event.key == K_r and self.aim_method != "manual":
@@ -223,11 +224,8 @@ class Window(object):
                                                      aim_method=self.aim_method,
                                                      auto_aim_take_effect=self.auto_aim_take_effect,
                                                      fire=True))
-                elif event.button == BUTTON_RIGHT:
-                    if self.aim_method != "manual":
-                        self.auto_aim_take_effect = not self.auto_aim_take_effect
-                    else:
-                        self.auto_aim_take_effect = False
+                elif event.button == BUTTON_RIGHT and self.aim_method != "manual":
+                    self.auto_aim_take_effect = not self.auto_aim_take_effect
             else:
                 speed, aim_method, send_message = self.speed, self.aim_method, False
                 if event.type == KEYDOWN and event.key in Window.SPEED_MAP:
@@ -249,7 +247,7 @@ class Window(object):
                         self._update_cur()
                         out_queue.put(Msg2Controller(speed=self.speed,
                                                      cur_delta=self.cur_delta,
-                                                     aim_method=self.aim_method))
+                                                     aim_method="manual"))
                     else:
                         out_queue.put(Msg2Controller(speed=self.speed,
                                                      aim_method=self.aim_method,
@@ -260,7 +258,7 @@ class Window(object):
                 self._update_cur()
                 out_queue.put(Msg2Controller(speed=self.speed,
                                              cur_delta=self.cur_delta,
-                                             aim_method=self.aim_method))
+                                             aim_method="manual"))
             else:
                 out_queue.put(Msg2Controller(speed=self.speed,
                                              aim_method=self.aim_method,

@@ -147,7 +147,6 @@ class S1Controller(Controller):
             if REVERSE_Y_AXIS:
                 pitch = - pitch
         logging.info("ROT Y%.2f P%.2f" % (yaw, pitch))
-        print("ROT Y%.2f P%.2f" % (yaw, pitch))
         if not self.debug:
             if self.speed == (0, 0) and \
                     yaw <= AIMING_DEAD_ZONE[0] and pitch <= AIMING_DEAD_ZONE[1]:
