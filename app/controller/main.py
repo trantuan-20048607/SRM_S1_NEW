@@ -135,8 +135,11 @@ class S1Controller(Controller):
             if msg.reset_auto_aim:
                 vision.reset()
             self.aim_target = vision.feed(img, color=ENEMY_COLOR[self.color], type_=self.aim_method)
-            yaw = (self.aim_target[0] - int(SCREEN_SIZE[0] * 0.5)) / SCREEN_SIZE[0] * AUTO_AIM_SENSITIVITY[0]
-            pitch = (int(SCREEN_SIZE[1] * 0.5) - self.aim_target[1]) / SCREEN_SIZE[1] * AUTO_AIM_SENSITIVITY[1]
+            if msg.auto_aim_take_effect:
+                yaw = (self.aim_target[0] - int(SCREEN_SIZE[0] * 0.5)) / SCREEN_SIZE[0] * AUTO_AIM_SENSITIVITY[0]
+                pitch = (int(SCREEN_SIZE[1] * 0.5) - self.aim_target[1]) / SCREEN_SIZE[1] * AUTO_AIM_SENSITIVITY[1]
+            else:
+                yaw, pitch = 0.0, 0.0
             logging.info(f"TGT {self.aim_target[0]}, {self.aim_target[1]}")
         else:
             yaw = msg.cur_delta[0] / SCREEN_SIZE[0] * MANUAL_AIM_SENSITIVITY[0]
@@ -144,6 +147,7 @@ class S1Controller(Controller):
             if REVERSE_Y_AXIS:
                 pitch = - pitch
         logging.info("ROT Y%.2f P%.2f" % (yaw, pitch))
+        print("ROT Y%.2f P%.2f" % (yaw, pitch))
         if not self.debug:
             if self.speed == (0, 0) and \
                     yaw <= AIMING_DEAD_ZONE[0] and pitch <= AIMING_DEAD_ZONE[1]:

@@ -10,6 +10,7 @@ class Msg2Controller(Msg):
     def __init__(self, speed: tuple = (0, 0),
                  cur_delta: tuple = (0, 0),
                  aim_method: str = DEFAULT_AIM_METHOD,
+                 auto_aim_take_effect: bool = False,
                  fire: bool = False,
                  reset_auto_aim: bool = False,
                  terminate: bool = False):
@@ -20,6 +21,7 @@ class Msg2Controller(Msg):
         self.speed = speed
         self.cur_delta = cur_delta
         self.aim_method = aim_method
+        self.auto_aim_take_effect = auto_aim_take_effect
         self.fire = fire
         self.reset_auto_aim = reset_auto_aim
         self.terminate = terminate

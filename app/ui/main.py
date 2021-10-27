@@ -39,6 +39,7 @@ class Window(object):
                            "terminate": False,
                            "ui_queue_empty": 0,
                            "ctr_queue_empty": 0}
+        self.auto_aim_take_effect = False
         self.fire_indicator_type = FIRE_IND_TYPE
         self.aim_method = DEFAULT_AIM_METHOD
         self.last_aim_target = (int(SCREEN_SIZE[0] * 0.5), int(SCREEN_SIZE[1] * 0.5))
@@ -69,14 +70,13 @@ class Window(object):
                 pygame.draw.circle(self.screen, color, (x, y), 2)
 
     def _update_cur(self):
-        if self.aim_method == "manual":
-            self.cur_delta = (0, 0)
-            cur_current = pygame.mouse.get_pos()
-            if cur_current != (int(SCREEN_SIZE[0] / 2), int(SCREEN_SIZE[1] / 2)):
-                self.cur_delta = (cur_current[0] - int(SCREEN_SIZE[0] / 2),
-                                  cur_current[1] - int(SCREEN_SIZE[1] / 2))
-                pygame.mouse.set_pos(int(SCREEN_SIZE[0] / 2), int(SCREEN_SIZE[1] / 2))
-                logging.debug("RESET CUR POS")
+        self.cur_delta = (0, 0)
+        cur_current = pygame.mouse.get_pos()
+        if cur_current != (int(SCREEN_SIZE[0] / 2), int(SCREEN_SIZE[1] / 2)):
+            self.cur_delta = (cur_current[0] - int(SCREEN_SIZE[0] / 2),
+                              cur_current[1] - int(SCREEN_SIZE[1] / 2))
+            pygame.mouse.set_pos(int(SCREEN_SIZE[0] / 2), int(SCREEN_SIZE[1] / 2))
+            logging.debug("RESET CUR POS")
 
     def update(self, msg: Msg2Window, ui_queue_size: int, ctr_queue_size: int, fps: tuple):
         if msg.err:
@@ -148,9 +148,14 @@ class Window(object):
                     self.screen.blit(ft.render("CTR", True, UI_COLOR_NOTICE), (192, 160))
             else:
                 self.show_delay["ctr_queue_empty"] = 0
-            if pygame.mouse.get_pos() != (int(SCREEN_SIZE[0] / 2), int(SCREEN_SIZE[1] / 2)) \
-                    and msg.aim_method == "manual":
-                self.screen.blit(ft.render("A", True, UI_COLOR_WARNING), (160, 256))
+            if msg.aim_method == "manual":
+                if pygame.mouse.get_pos() != (int(SCREEN_SIZE[0] / 2), int(SCREEN_SIZE[1] / 2)):
+                    self.screen.blit(ft.render("A", True, UI_COLOR_WARNING), (160, 256))
+            else:
+                if self.auto_aim_take_effect:
+                    self.screen.blit(ft.render("A", True, UI_COLOR_NORMAL), (160, 256))
+                else:
+                    self.screen.blit(ft.render("A", True, UI_COLOR_NOTICE), (160, 256))
             if msg.aim_method == "manual":
                 self._draw_indicator(int(SCREEN_SIZE[0] / 2), int(SCREEN_SIZE[1] / 2), self.fire_indicator_type)
             else:
@@ -162,7 +167,8 @@ class Window(object):
                 self.screen.blit(ft.render("F", True, UI_COLOR_WARNING), (224, 256))
                 self.show_delay["fire"] -= 1
             elif msg.aim_method != "manual":
-                dist = self.cur_delta[0] * self.cur_delta[0] + self.cur_delta[1] * self.cur_delta[1]
+                dist = (msg.aim_target[0] - SCREEN_SIZE[0] / 2) * (msg.aim_target[0] - SCREEN_SIZE[0] / 2) + \
+                       (msg.aim_target[1] - SCREEN_SIZE[1] / 2) * (msg.aim_target[1] - SCREEN_SIZE[1] / 2)
                 if dist <= 6:
                     self.screen.blit(ft.render(
                         "F", True, UI_COLOR_NORMAL if dist <= 2 and self.speed == (0, 0) else UI_COLOR_NOTICE),
@@ -185,46 +191,77 @@ class Window(object):
     def feedback(self, out_queue: mp.Queue):
         for event in pygame.event.get():
             if event.type == QUIT or event.type == KEYDOWN and event.key == K_ESCAPE:
-                self.show_delay["terminate"] = True
                 while not out_queue.empty():
                     _ = out_queue.get()
+                self.show_delay["terminate"] = True
                 out_queue.put(Msg2Controller(terminate=True))
                 break
             elif event.type == KEYDOWN and event.key == K_i and self.aim_method == "manual":
                 self.fire_indicator_type = (self.fire_indicator_type + 1) % 3
-            elif event.type == KEYDOWN and event.key == K_r:
+            elif event.type == KEYDOWN and event.key == K_r and self.aim_method != "manual":
                 if out_queue.full():
                     _ = out_queue.get()
-                self._update_cur()
-                out_queue.put(Msg2Controller(cur_delta=self.cur_delta,
+                self.auto_aim_take_effect = False
+                out_queue.put(Msg2Controller(speed=self.speed,
                                              aim_method=self.aim_method,
+                                             auto_aim_take_effect=False,
                                              reset_auto_aim=True))
-            elif event.type == MOUSEBUTTONDOWN and event.button == BUTTON_LEFT:
-                if out_queue.full():
-                    _ = out_queue.get()
-                self._update_cur()
-                self.show_delay["fire"] = FIRE_UI_SHOW_TIME
-                out_queue.put(Msg2Controller(cur_delta=self.cur_delta,
-                                             aim_method=self.aim_method,
-                                             fire=True))
+            elif event.type == MOUSEBUTTONDOWN:
+                if event.button == BUTTON_LEFT:
+                    if out_queue.full():
+                        _ = out_queue.get()
+
+                    self.show_delay["fire"] = FIRE_UI_SHOW_TIME
+                    if self.aim_method == "manual":
+                        self._update_cur()
+                        out_queue.put(Msg2Controller(speed=self.speed,
+                                                     cur_delta=self.cur_delta,
+                                                     aim_method="manual",
+                                                     fire=True))
+                    else:
+                        out_queue.put(Msg2Controller(speed=self.speed,
+                                                     aim_method=self.aim_method,
+                                                     auto_aim_take_effect=self.auto_aim_take_effect,
+                                                     fire=True))
+                elif event.button == BUTTON_RIGHT:
+                    if self.aim_method != "manual":
+                        self.auto_aim_take_effect = not self.auto_aim_take_effect
+                    else:
+                        self.auto_aim_take_effect = False
             else:
-                speed, aim_method = self.speed, self.aim_method
+                speed, aim_method, send_message = self.speed, self.aim_method, False
                 if event.type == KEYDOWN and event.key in Window.SPEED_MAP:
                     speed = (speed[0] + Window.SPEED_MAP[event.key][0], speed[1] + Window.SPEED_MAP[event.key][1])
+                    send_message = True
                 elif event.type == KEYDOWN and event.key in (K_q, K_e):
                     aim_method = {K_q: AIM_METHOD_SELECT_LIST[self.aim_method], K_e: "manual"}[event.key]
+                    send_message = True
                 elif event.type == KEYUP and event.key in Window.SPEED_MAP:
                     speed = (speed[0] - Window.SPEED_MAP[event.key][0], speed[1] - Window.SPEED_MAP[event.key][1])
-                if (self.speed != speed or self.aim_method != aim_method) and not out_queue.full():
-                    self._update_cur()
+                    send_message = True
+                if send_message and not out_queue.full():
                     self.speed = speed
+                    if self.aim_method != aim_method:
+                        self.auto_aim_take_effect = False
+                        pygame.mouse.set_visible(aim_method != "manual")
                     self.aim_method = aim_method
-                    pygame.mouse.set_visible(self.aim_method != "manual")
-                    out_queue.put(Msg2Controller(speed=self.speed,
-                                                 cur_delta=self.cur_delta,
-                                                 aim_method=self.aim_method))
+                    if self.aim_method == "manual":
+                        self._update_cur()
+                        out_queue.put(Msg2Controller(speed=self.speed,
+                                                     cur_delta=self.cur_delta,
+                                                     aim_method=self.aim_method))
+                    else:
+                        out_queue.put(Msg2Controller(speed=self.speed,
+                                                     aim_method=self.aim_method,
+                                                     auto_aim_take_effect=self.auto_aim_take_effect))
+
         if out_queue.empty():
-            self._update_cur()
-            out_queue.put(Msg2Controller(speed=self.speed,
-                                         cur_delta=self.cur_delta,
-                                         aim_method=self.aim_method))
+            if self.aim_method == "manual":
+                self._update_cur()
+                out_queue.put(Msg2Controller(speed=self.speed,
+                                             cur_delta=self.cur_delta,
+                                             aim_method=self.aim_method))
+            else:
+                out_queue.put(Msg2Controller(speed=self.speed,
+                                             aim_method=self.aim_method,
+                                             auto_aim_take_effect=self.auto_aim_take_effect))

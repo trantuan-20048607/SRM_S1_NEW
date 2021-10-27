@@ -30,23 +30,24 @@ def start(color: str):
     while ret:
         time_start = time.time()
 
+        img_ = img.copy()
+
         # 目标位置
-        if play_video:
-            _ = vision.feed(img, color)
+        _ = vision.feed(img_, color)
 
-            # 显示 FPS
-            cv.putText(img, "FPS %d/%d" % (int(real_fps), int(max_fps)) if
-            max_fps < 1e4 else "FPS %d/INF" % int(real_fps),
-                       (0, 24), cv.FONT_HERSHEY_SIMPLEX,
-                       0.85, (0, 192, 0), 2)
+        # 显示 FPS
+        cv.putText(img_, "FPS %d/%d" % (int(real_fps), int(max_fps)) if
+        max_fps < 1e4 else "FPS %d/INF" % int(real_fps),
+                   (0, 24), cv.FONT_HERSHEY_SIMPLEX,
+                   0.85, (0, 192, 0), 2)
 
-            # 显示时间开销
-            cv.putText(img, "COST %.5f" % cost,
-                       (0, 48), cv.FONT_HERSHEY_SIMPLEX,
-                       0.85, (0, 192, 0), 2)
+        # 显示时间开销
+        cv.putText(img_, "COST %.5f" % cost,
+                   (0, 48), cv.FONT_HERSHEY_SIMPLEX,
+                   0.85, (0, 192, 0), 2)
 
         # 窗口生成
-        cv.imshow("VISION MODULE TEST", img)
+        cv.imshow("VISION MODULE TEST", img_)
 
         for i in range(len(HSV_RANGE[color])):
             for j in range(3):
@@ -67,4 +68,6 @@ def start(color: str):
 
         if play_video:
             ret, img = read_video.read()
+        else:
+            vision.reset()
     cv.destroyAllWindows()
