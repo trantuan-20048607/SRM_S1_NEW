@@ -104,8 +104,8 @@ class Window(object):
             pygame.surfarray.blit_array(self.screen, cv.cvtColor(msg.img, cv.COLOR_BGR2RGB))
             self.screen.blit(pygame.font.Font(
                 "assets/DVS.ttf", 70).render(
-                "GAME OVER", True, UI_COLOR_WARNING),
-                (int((SCREEN_SIZE[0] - 360) / 2), int(SCREEN_SIZE[1] / 2) - 70))
+                "WAITING", True, UI_COLOR_WARNING),
+                (int((SCREEN_SIZE[0] - 280) / 2), int(SCREEN_SIZE[1] / 2) - 70))
             pygame.display.flip()
         else:
             pygame.surfarray.blit_array(self.screen, cv.cvtColor(msg.img, cv.COLOR_BGR2RGB))

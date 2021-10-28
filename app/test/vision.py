@@ -18,15 +18,6 @@ def start(color: str):
     def blank(x: int):
         pass
 
-    for i in range(len(HSV_RANGE[color])):
-        cv.namedWindow(f"HSV {i}", cv.WINDOW_NORMAL)
-        for j in range(3):
-            c = ["H", "S", "V"][j]
-            cv.createTrackbar(f"MIN {c}", f"HSV {i}", HSV_RANGE[color][i][0][j],
-                              180 if j == 0 else 255, blank)
-            cv.createTrackbar(f"MAX {c}", f"HSV {i}", HSV_RANGE[color][i][1][j],
-                              180 if j == 0 else 255, blank)
-
     while ret:
         time_start = time.time()
 
@@ -48,12 +39,6 @@ def start(color: str):
 
         # 窗口生成
         cv.imshow("VISION MODULE TEST", img)
-
-        for i in range(len(HSV_RANGE[color])):
-            for j in range(3):
-                c = ["H", "S", "V"][j]
-                vision.modify_hsv_range(color, i, 0, j, cv.getTrackbarPos(f"MIN {c}", f"HSV {i}"))
-                vision.modify_hsv_range(color, i, 1, j, cv.getTrackbarPos(f"MAX {c}", f"HSV {i}"))
 
         cost = time.time() - time_start
         max_fps = 1.0 / max((time.time() - time_start), 1e-4)

@@ -15,7 +15,7 @@ QUEUE_BLOCK_THRESH = 2
 UI_FPS_LIMIT = 60
 
 # 限制控制器帧率
-CTR_FPS_LIMIT = 30
+CTR_FPS_LIMIT = 60
 
 # --------------------
 #     ⚪ 界面设置 ⚪
@@ -121,21 +121,14 @@ REVERSE_Y_AXIS = False
 #    ⚪ 自瞄参数设置 ⚪
 # --------------------
 
-# 色彩提取范围定义
-HSV_RANGE = {
-    "red": [(np.array([172, 84, 92]), np.array([180, 255, 255])),
-            (np.array([0, 94, 82]), np.array([10, 255, 255]))],
-    "blue": [(np.array([86, 84, 84]), np.array([104, 255, 255]))]
-}
-
 # 参与识别的最小矩形面积
-MIN_RECT_AREA = 96
+MIN_RECT_AREA = 258
 
 # 判定识别有效所需的面积总和
-MIN_VALID_TOTAL_AREA = 192
+MIN_VALID_TOTAL_AREA = 768
 
 # 灰度门限
-GRAY_THRESH = 2
+GRAY_THRESH = 112
 
 # ROI 激活边界
 ROI_LIMIT = 128
