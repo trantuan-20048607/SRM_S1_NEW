@@ -73,8 +73,7 @@ def _ident_tgt(img, color):
     elif color == "blue":
         _, binary = cv.threshold(cv.subtract(img[:, :, 0], img[:, :, 1]), GRAY_THRESH, 255, cv.THRESH_BINARY)
 
-    # cv.medianBlur(binary, 3)
-    cv.imshow("bin", binary)
+    cv.medianBlur(binary, 3)
     contours, _ = cv.findContours(binary, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE)
     center_x, center_y, weight = 0.0, 0.0, 0.0
     if contours:
