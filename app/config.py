@@ -122,10 +122,10 @@ REVERSE_Y_AXIS = False
 # --------------------
 
 # 参与识别的最小矩形面积
-MIN_RECT_AREA = 258
+MIN_RECT_AREA = 192
 
 # 判定识别有效所需的面积总和
-MIN_VALID_TOTAL_AREA = 768
+MIN_VALID_TOTAL_AREA = 512
 
 # 灰度门限
 GRAY_THRESH = 112
