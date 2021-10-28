@@ -15,7 +15,7 @@ QUEUE_BLOCK_THRESH = 2
 UI_FPS_LIMIT = 60
 
 # 限制控制器帧率
-CTR_FPS_LIMIT = 60
+CTR_FPS_LIMIT = 30
 
 # --------------------
 #     ⚪ 界面设置 ⚪
@@ -122,13 +122,13 @@ REVERSE_Y_AXIS = False
 # --------------------
 
 # 参与识别的最小矩形面积
-MIN_RECT_AREA = 192
+MIN_RECT_AREA = 128
 
 # 判定识别有效所需的面积总和
-MIN_VALID_TOTAL_AREA = 512
+MIN_VALID_TOTAL_AREA = 192
 
 # 灰度门限
-GRAY_THRESH = 112
+GRAY_THRESH = 100
 
 # ROI 激活边界
 ROI_LIMIT = 128

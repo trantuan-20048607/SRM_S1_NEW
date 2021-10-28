@@ -15,7 +15,7 @@ import argparse
 import logging
 
 from app.config import *
-# TODO 在此处导入设置模块
+# TODO 在此处导入测试模块
 from app.test import vision
 
 if __name__ == "__main__":
