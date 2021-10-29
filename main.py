@@ -28,11 +28,9 @@ if __name__ == "__main__":
     args = parser.parse_args()
     color = ""
     for col in COLOR_LIST:
-        assert color == ""
-
         if eval(f"args.{col}"):
+            assert color == ""
             color = col
-            break
     assert color != ""
 
     logging.basicConfig(level={True: logging.DEBUG, False: logging.INFO}[args.debug],

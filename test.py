@@ -35,10 +35,9 @@ if __name__ == "__main__":
 
     color = ""
     for col in COLOR_LIST:
-        assert color == ""
         if eval(f"args.{col}"):
+            assert color == ""
             color = col
-            break
     assert color != ""
 
     # TODO 在此处加入测试入口
