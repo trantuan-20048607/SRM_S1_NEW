@@ -127,8 +127,11 @@ MIN_RECT_AREA = 128
 # 判定识别有效所需的面积总和
 MIN_VALID_TOTAL_AREA = 192
 
-# 灰度门限
-GRAY_THRESH = 100
+# 二值化门限
+BIN_THRESH = {
+    "red": 80,
+    "blue": 100
+}
 
 # ROI 激活边界
 ROI_LIMIT = 128

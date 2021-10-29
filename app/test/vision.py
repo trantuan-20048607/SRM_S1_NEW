@@ -15,8 +15,11 @@ def start(color: str):
     # 初始化数值
     max_fps, real_fps, cost = 0.0, 0.0, 0.0
 
-    def blank(x: int):
-        pass
+    def modify_thresh(x: int):
+        vision.modify_thresh(color, x)
+
+    cv.namedWindow("Control", cv.WINDOW_NORMAL)
+    cv.createTrackbar("THRESH", "Control", BIN_THRESH[color], 255, modify_thresh)
 
     while ret:
         time_start = time.time()

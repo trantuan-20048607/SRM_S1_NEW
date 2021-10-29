@@ -8,7 +8,7 @@ import cv2 as cv
 
 from app.config import *
 
-__all__ = ["feed", "reset"]
+__all__ = ["feed", "reset", "modify_thresh"]
 
 _kalman = cv.KalmanFilter(4, 2)
 _last_pre = _current_pre = _last_mes = _current_mes = np.array([[SCREEN_SIZE[0] * 0.5],
@@ -21,6 +21,10 @@ _target_weight = 0.0
 
 _roi_enabled = False
 _current_type = DEFAULT_AIM_METHOD
+
+
+def modify_thresh(color: str, value: int):
+    BIN_THRESH[color] = value
 
 
 def _kalman_reset():
@@ -69,9 +73,9 @@ def _ident_tgt(img, color):
     assert color in COLOR_LIST
 
     if color == "red":
-        _, binary = cv.threshold(cv.subtract(img[:, :, 2], img[:, :, 1]), GRAY_THRESH, 255, cv.THRESH_BINARY)
+        _, binary = cv.threshold(cv.subtract(img[:, :, 2], img[:, :, 1]), BIN_THRESH["red"], 255, cv.THRESH_BINARY)
     elif color == "blue":
-        _, binary = cv.threshold(cv.subtract(img[:, :, 0], img[:, :, 1]), GRAY_THRESH, 255, cv.THRESH_BINARY)
+        _, binary = cv.threshold(cv.subtract(img[:, :, 0], img[:, :, 1]), BIN_THRESH["blue"], 255, cv.THRESH_BINARY)
 
     cv.medianBlur(binary, 3)
     contours, _ = cv.findContours(binary, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE)
