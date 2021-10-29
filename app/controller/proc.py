@@ -23,7 +23,7 @@ def start(color: str, debug: bool, in_queue: mp.Queue, out_queue: mp.Queue, reco
     if record:
         write_video = cv.VideoWriter(f'tmp/{time.strftime("%Y-%m-%d-%H-%M-%S", time.gmtime())}_s1{color}.avi',
                                      cv.VideoWriter_fourcc(*'XVID'), CTR_FPS_LIMIT, SCREEN_SIZE, True)
-    real_fps, max_fps, s1 = 0.0, 0.0, S1Controller("S1", color, debug)
+    real_fps, max_fps, s1, current_msg_id = 0.0, 0.0, S1Controller("S1", color, debug), 0
 
     def terminate_window():
         while not out_queue.empty():
@@ -49,11 +49,14 @@ def start(color: str, debug: bool, in_queue: mp.Queue, out_queue: mp.Queue, reco
                 continue
             logging.debug(f"I {in_queue.qsize()} O {out_queue.qsize()}")
             if not in_queue.empty():
-                s1.act(img, in_queue.get())
+                msg = in_queue.get()
+                current_msg_id = msg.id
+                s1.act(img, msg)
             if not out_queue.full():
                 out_queue.put(
-                    Msg2Window(img=cv.transpose(img), hp=s1.hp, heat=s1.heat, bat=s1.bat,
-                               aim_method=s1.aim_method, aim_target=s1.aim_target,
+                    Msg2Window(corresponding_id=current_msg_id,
+                               img=cv.transpose(img), hp=s1.hp, heat=s1.heat, bat=s1.bat,
+                               speed=s1.speed, aim_method=s1.aim_method, aim_target=s1.aim_target,
                                fps=(real_fps, max_fps)))
             if record:
                 cv.putText(img, "FPS %.0f/%d" % (real_fps, CTR_FPS_LIMIT),

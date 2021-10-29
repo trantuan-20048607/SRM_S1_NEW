@@ -5,6 +5,7 @@ import logging
 import math
 
 import cv2 as cv
+import numpy as np
 
 from app.config import *
 
@@ -63,8 +64,8 @@ def reset():
 
 
 def _roi_cut_img(img, center, size):
-    return img[max(int(center[1] - size[1] * 0.5), 0):min(int(center[1] + size[1] * 0.5), SCREEN_SIZE[1]),
-           max(int(center[0] - size[0] * 0.5), 0):min(int(center[0] + size[0] * 0.5), SCREEN_SIZE[0])]
+    return img[max(int(center[1] - size[1] * 0.5), 4):min(int(center[1] + size[1] * 0.5), SCREEN_SIZE[1] - 4),
+           max(int(center[0] - size[0] * 0.5), 4):min(int(center[0] + size[0] * 0.5), SCREEN_SIZE[0] - 4)]
 
 
 def _ident_tgt(img, color):
@@ -192,8 +193,9 @@ def feed(img: np.ndarray, color: str, type_: str = AIM_METHOD_SELECT_LIST[DEFAUL
             _direct_target_data = (_direct_target_data[0] - roi_size * 0.5 + last_x,
                                    _direct_target_data[1] - roi_size * 0.5 + last_y)
             _smooth(_direct_target_data, type_)
-            cv.rectangle(img, (int(last_x - roi_size * 0.5), int(last_y - roi_size * 0.5)),
-                         (int(last_x + roi_size * 0.5), int(last_y + roi_size * 0.5)), UI_COLOR_NOTICE, 2)
+            cv.rectangle(img, (max(int(last_x - roi_size * 0.5), 4), max(int(last_y - roi_size * 0.5), 4)),
+                         (min(int(last_x + roi_size * 0.5), SCREEN_SIZE[0] - 4),
+                         min(int(last_y + roi_size * 0.5), SCREEN_SIZE[1] - 4)), UI_COLOR_NOTICE, 2)
             return _get_target_position(type_)
         else:
             _roi_enabled = False

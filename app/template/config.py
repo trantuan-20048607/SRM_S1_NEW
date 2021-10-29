@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 
-import numpy as np
 from robomaster import led
 
 # --------------------
@@ -104,10 +103,10 @@ DEFAULT_AIM_METHOD = "manual"
 AIMING_DEAD_ZONE = (0.1, 0.1)
 
 # 手动瞄准灵敏度
-MANUAL_AIM_SENSITIVITY = (180, 45)
+MANUAL_AIM_SENSITIVITY = (180, 75)
 
 # 自动瞄准灵敏度
-AUTO_AIM_SENSITIVITY = (90, 15)
+AUTO_AIM_SENSITIVITY = (75, 20)
 
 # 反转 Y 轴，用于鼠标模拟摇杆操作
 REVERSE_Y_AXIS = False
