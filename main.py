@@ -26,6 +26,7 @@ if __name__ == "__main__":
             f"-{color[0]}", f"--{color}", default=False,
             help=f"{color.upper()} MODE", action="store_true")
     args = parser.parse_args()
+
     color = ""
     for col in COLOR_LIST:
         if eval(f"args.{col}"):

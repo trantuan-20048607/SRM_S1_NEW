@@ -14,7 +14,7 @@ QUEUE_BLOCK_THRESH = 2
 UI_FPS_LIMIT = 60
 
 # 限制控制帧率
-CTR_FPS_LIMIT = 30
+CTR_FPS_LIMIT = 45
 
 # --------------------
 #     ⚪ 界面设置 ⚪

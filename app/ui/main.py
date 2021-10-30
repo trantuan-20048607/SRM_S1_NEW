@@ -7,7 +7,6 @@ import time
 
 import cv2 as cv
 import pygame
-import pygame.gfxdraw as gfx
 from pygame.locals import *
 
 from app.config import *
@@ -36,6 +35,7 @@ class Window(object):
         self.screen = pygame.display.set_mode(SCREEN_SIZE, flags=pygame.DOUBLEBUF)
         self.speed = (0, 0)
         self.cur_delta = (0, 0)
+        self.time_start = time.time()
         self.show_delay = {"fire": 0,
                            "terminate": False,
                            "ui_queue_empty": 0,
@@ -113,15 +113,17 @@ class Window(object):
         else:
             pygame.surfarray.blit_array(self.screen, cv.cvtColor(msg.img, cv.COLOR_BGR2RGB))
             ft = pygame.font.Font(UI_FONT, 20)
-            gfx.box(self.screen, pygame.Rect(0, 0, 314, 40), (153, 0, 255, 96))
             if self.record:
                 self.screen.blit(ft.render("REC", True, UI_COLOR_WARNING), (0, 40))
-                gfx.box(self.screen, pygame.Rect(0, 40, 42, 40), (153, 0, 255, 96))
             self.screen.blit(ft.render("UI  FPS %.0f/%.0f" % fps, True,
                                        UI_COLOR_NORMAL if fps[0] * 2 > UI_FPS_LIMIT else UI_COLOR_WARNING), (0, 0))
             self.screen.blit(ft.render("CTR FPS %.0f/%.0f" % msg.fps, True,
                                        UI_COLOR_NORMAL if msg.fps[0] * 2 > CTR_FPS_LIMIT else UI_COLOR_WARNING),
                              (0, 20))
+            time_delta = int(time.time() - self.time_start)
+            self.screen.blit(ft.render(
+                "%02d:%02d" % (time_delta // 60, time_delta % 60), True, UI_COLOR_WARNING),
+                ((int(SCREEN_SIZE[0]) - 60) / 2, 24))
             if msg.corresponding_id in self.time_send:
                 self.show_delay["ctr"] = msg.time - self.time_send[msg.corresponding_id]
                 del self.time_send[msg.corresponding_id]
@@ -132,7 +134,6 @@ class Window(object):
             self.screen.blit(ft.render("DELAY %.3fs" % self.show_delay["ctr"], True,
                                        UI_COLOR_NORMAL if self.show_delay["ctr"] <= 0.05 else UI_COLOR_WARNING),
                              (172, 20))
-            gfx.box(self.screen, pygame.Rect(86, 54, 212, 254), (153, 0, 255, 96))
             ft = pygame.font.Font(UI_FONT, 30)
             self.screen.blit(ft.render(
                 f"HP {msg.hp}", True,

@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 
 import logging
-import threading
 import time
 
 import numpy as np
@@ -32,12 +31,6 @@ class S1Controller(Controller):
         self.cool_time = time.time()
         self.aim_method = DEFAULT_AIM_METHOD
         self.aim_target = (int(SCREEN_SIZE[0] / 2), int(SCREEN_SIZE[1] / 2))
-        self.lock = {
-            "heat": threading.Lock(),
-            "hp": threading.Lock(),
-            "cool_time": threading.Lock()
-        }
-        threading.Thread(target=self._cool).start()
         if not self.debug:
             self.s1 = robot.Robot()
             self.s1.initialize(conn_type="ap", proto_type="udp")
@@ -54,38 +47,13 @@ class S1Controller(Controller):
             self.action_state = True
             self.gimbal_action = None
 
-    def _modify_hp(self, hp):
-        self.lock["hp"].acquire()
-        self.hp = hp
-        logging.info(f"HP {self.hp} / {S1Robot.INITIAL_HP}")
-        self.lock["hp"].release()
-
-    def _modify_heat(self, heat):
-        self.lock["heat"].acquire()
-        self.heat = heat
-        logging.info(f"HEAT {self.heat}")
-        self.lock["heat"].release()
-
-    def _reset_cool_time(self):
-        self.lock["cool_time"].acquire()
-        self.cool_time = time.time()
-        self.lock["cool_time"].release()
-
-    def _cool(self):
-        while self.hp > 0:
-            if 0.95 < time.time() - self.cool_time <= 1.05:
-                logging.info("COOLING")
-                self._reset_cool_time()
-                self._modify_heat(max(self.heat - S1Robot.COOL_HEAT, 0))
-            time.sleep(0.1)
-
     def _bleed(self, tag):
         if tag == "hit":
             logging.info("HIT")
             if self.hp <= S1Robot.HIT_DMG:
                 self.die()
             else:
-                self._modify_hp(self.hp - S1Robot.HIT_DMG)
+                self.hp -= S1Robot.HIT_DMG
                 if not self.debug:
                     self.s1.led.set_led(comp=led.COMP_ALL,
                                         r=SUB_COLOR[self.color][0],
@@ -99,11 +67,10 @@ class S1Controller(Controller):
                                         b=COLOR[self.color][2], effect=led.EFFECT_ON)
         elif tag == "burn":
             logging.info("BURNING")
-            dmg = min(self.heat - S1Robot.MAX_HEAT, S1Robot.MAX_BURN_DMG)
-            if self.hp <= dmg:
+            if self.hp <= S1Robot.BURN_DMG:
                 self.die()
             else:
-                self._modify_hp(self.hp - dmg)
+                self.hp -= S1Robot.BURN_DMG
 
     def _battery_callback(self, bat):
         self.bat = bat
@@ -124,9 +91,13 @@ class S1Controller(Controller):
         if msg.terminate:
             self.die()
             return
+        if time.time() - self.cool_time >= 1:
+            logging.info("COOLING")
+            self.cool_time = time.time()
+            self.heat = max(self.heat - S1Robot.COOL_HEAT, 0)
+        if not self.debug:
+            self.s1.chassis.drive_speed(x=msg.speed[0], y=msg.speed[1], z=0, timeout=1)
         if self.speed != msg.speed:
-            if not self.debug:
-                self.s1.chassis.drive_speed(x=msg.speed[0], y=msg.speed[1], z=0, timeout=1)
             self.speed = msg.speed
             logging.debug(f"SPD CHG X{msg.speed[0]} Y{msg.speed[1]}")
         if self.aim_method != msg.aim_method:
@@ -165,14 +136,14 @@ class S1Controller(Controller):
                 self.s1.blaster.set_led(200)
                 self.s1.blaster.fire(blaster.INFRARED_FIRE, 1)
             if self.heat == 0:
-                self._reset_cool_time()
-            self._modify_heat(self.heat + S1Robot.FIRE_HEAT)
+                self.cool_time = time.time()
+            self.heat += S1Robot.FIRE_HEAT
             if self.heat > S1Robot.MAX_HEAT:
                 self._bleed(tag="burn")
 
     def die(self):
         logging.info("DIE")
-        self._modify_hp(0)
+        self.hp = 0
         if not self.debug:
             self.s1.chassis.drive_speed(x=0, y=0, z=0, timeout=1)
             self.s1.led.set_led(comp=led.COMP_ALL,
