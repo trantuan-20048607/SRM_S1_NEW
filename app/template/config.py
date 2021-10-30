@@ -94,7 +94,8 @@ AUTO_AIM_METHOD_NAME = {"default": "DEFAULT (NO FLT)"}
 
 # 瞄准方式切换顺序
 # 处于左边的模式时，按下 Q 切换至右边模式，确保每一个模式都有对应的切换目标
-AIM_METHOD_SELECT_LIST = {"manual": "default"}
+AIM_METHOD_SELECT_LIST = {"manual": "default",
+                          "default": "default"}
 
 # 默认瞄准方式，建议选择手动
 DEFAULT_AIM_METHOD = "manual"
