@@ -7,7 +7,7 @@ import numpy as np
 from robomaster import *
 
 from app.config import *
-from app.controller.const import S1Robot
+from app.controller.config import S1Robot
 from app.controller.msg import *
 from app.core import vision
 from app.core.controller import *
