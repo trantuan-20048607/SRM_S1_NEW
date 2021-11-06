@@ -7,7 +7,7 @@ import time
 import cv2 as cv
 
 from app.config import *
-from app.controller.config import S1Robot
+from config.controller import S1Robot
 from app.controller.main import *
 from app.ui.msg import *
 

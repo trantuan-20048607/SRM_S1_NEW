@@ -10,7 +10,7 @@ import pygame
 from pygame.locals import *
 
 from app.config import *
-from app.controller.config import S1Robot
+from config.controller import S1Robot
 from app.controller.msg import *
 from app.ui.msg import *
 

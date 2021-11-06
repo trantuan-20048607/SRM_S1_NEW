@@ -5,10 +5,10 @@ import pstats
 from functools import wraps
 from pstats import SortKey
 
-__all__ = ["cpu_usage"]
+__all__ = ["analyzer"]
 
 
-def cpu_usage(method):
+def analyzer(method):
     @wraps(method)
     def wrap(*args, **kwargs):
         with cProfile.Profile() as profile:

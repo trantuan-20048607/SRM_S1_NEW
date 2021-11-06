@@ -184,8 +184,8 @@ SRM_S1_NEW
   `from app.benchmark.timer import *`  
   在函数定义前一行插入修饰器 `@timer` ，运行后可在对应的日志中查看。
 - 要测试某个函数内部各个行为的耗时，导入模块:  
-  `from app.benchmark.cpu_usage import *`  
-  在函数定义前一行插入修饰器 `@cpu_usage` ， 运行时将在控制台中显示。
+  `from app.benchmark.analyzer import *`  
+  在函数定义前一行插入修饰器 `@analyzer` ， 运行时将在控制台中显示。
 
 ## 早期版本更新记录 ##
 
