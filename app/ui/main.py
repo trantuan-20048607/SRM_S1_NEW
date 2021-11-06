@@ -10,7 +10,7 @@ import pygame
 from pygame.locals import *
 
 from app.config import *
-from config.controller import S1Robot
+from app.controller.config import S1Robot
 from app.controller.msg import *
 from app.ui.msg import *
 
@@ -203,7 +203,7 @@ class Window(object):
                 self.screen.blit(ft.render("SWITCHING", True, UI_COLOR_WARNING), (96, 208))
             else:
                 if msg.aim_method != "manual":
-                    self.screen.blit(ft.render("%s" % AUTO_AIM_METHOD_NAME[msg.aim_method],
+                    self.screen.blit(ft.render("%s" % AUTO_AIM_METHOD_LIST[msg.aim_method],
                                                True, UI_COLOR_NORMAL), (96, 208))
                 else:
                     self.screen.blit(ft.render("MANUAL", True, UI_COLOR_NOTICE), (96, 208))

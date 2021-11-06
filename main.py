@@ -15,7 +15,7 @@ import argparse
 import logging
 
 from app.config import *
-from app.core.container import *
+from app.core.launcher import *
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
@@ -38,5 +38,5 @@ if __name__ == "__main__":
                         filename="logs/app.log", filemode="w",
                         format="%(asctime)s - %(pathname)s[line:%(lineno)d] - %(levelname)s: %(message)s")
 
-    app = Container(color, args.debug, args.record)
+    app = Launcher(color, args.debug, args.record)
     app.start()

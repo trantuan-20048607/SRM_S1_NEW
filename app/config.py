@@ -7,13 +7,14 @@ from robomaster import led
 # --------------------
 
 # 队列阻塞阈值
-# 某个队列内消息超过该数量时，将在界面上警告延迟
+# 队列内消息超过该数量时，将在界面上显示红色的 UI 或 CTR 警告延迟
 QUEUE_BLOCK_THRESH = 2
 
 # 限制显示帧率
 UI_FPS_LIMIT = 60
 
-# 限制控制器帧率
+# 限制控制帧率
+# 使用视频测试时，请改为视频固有帧率；使用真机时请改为 45 以上
 CTR_FPS_LIMIT = 45
 
 # --------------------
@@ -84,22 +85,22 @@ HIT_EFFECT = {
 #    ⚪ 瞄准设置 ⚪
 # --------------------
 
-# 自动瞄准方式列表
-# 在此处列出所有自动瞄准方法，手动瞄准默认为 "manual" 且不可修改
-AUTO_AIM_METHOD_LIST = ("kalman", "tri", "direct")
-
 # 各个自瞄方法的显示名称
 # 请勿写成中文，否则录制视频时（OpenCV）将无法显示名称
-AUTO_AIM_METHOD_NAME = {"tri": "TRI FLT",
-                        "kalman": "KALMAN FLT",
-                        "direct": "NO FLT"}
+AUTO_AIM_METHOD_LIST = {"default": "DEFAULT (NO FLT)"
+
+                        # TODO 在此处插入更多自瞄方式
+
+                        }
 
 # 瞄准方式切换顺序
 # 处于左边的模式时，按下 Q 切换至右边模式，确保每一个模式都有对应的切换目标
-AIM_METHOD_SELECT_LIST = {"manual": "tri",
-                          "kalman": "direct",
-                          "tri": "kalman",
-                          "direct": "tri"}
+AIM_METHOD_SELECT_LIST = {"manual": "default",
+                          "default": "default"
+
+                          # TODO 在此处插入更多切换顺序
+
+                          }
 
 # 默认瞄准方式，建议选择手动
 DEFAULT_AIM_METHOD = "manual"
@@ -120,29 +121,10 @@ REVERSE_Y_AXIS = False
 #    ⚪ 自瞄参数设置 ⚪
 # --------------------
 
-# 参与识别的最小矩形面积
-MIN_RECT_AREA = 128
-
-# 判定识别有效所需的面积总和
-MIN_VALID_TOTAL_AREA = 192
-
-# 二值化门限
-BIN_THRESH = {
-    "red": 96,
-    "blue": 72
-}
-
-# ROI 激活边界
-ROI_LIMIT = 128
+# TODO 此处填写自瞄处理参数
 
 # --------------------
 #    ⚪ 自瞄平滑设置 ⚪
 # --------------------
 
-# KALMAN 滤波器参数，详见 README
-KALMAN_SHAKE_CONTROL = 1e-3
-KALMAN_DELAY_CONTROL = 1e-1
-
-# 差分反馈参数，详见 README
-TRIANGULAR_DIFFERENCE_WEIGHT = ((1, 2, 1), (2, 2, 1), (3, 1, 0))
-TRIANGULAR_SIDE_LEN_LEVEL = (24, 48)
+# TODO 此处填写滤波器参数

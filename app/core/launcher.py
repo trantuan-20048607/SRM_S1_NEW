@@ -6,10 +6,10 @@ import app.controller.proc as controller
 import app.ui.proc as ui
 from app.config import *
 
-__all__ = ["Container"]
+__all__ = ["Launcher"]
 
 
-class Container(object):
+class Launcher(object):
     def __init__(self, color: str, debug: bool, record: bool):
         assert color in COLOR_LIST
 

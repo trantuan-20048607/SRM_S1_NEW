@@ -7,7 +7,7 @@ import time
 import cv2 as cv
 
 from app.config import *
-from config.controller import S1Robot
+from app.controller.config import S1Robot
 from app.controller.main import *
 from app.ui.msg import *
 
@@ -73,7 +73,7 @@ def start(color: str, debug: bool, in_queue: mp.Queue, out_queue: mp.Queue, reco
                                (0, 120), cv.FONT_HERSHEY_SIMPLEX,
                                0.85, (50, 150, 250), 2)
                 if s1.aim_method != "manual":
-                    cv.putText(img, f"AUTO AIM: {AUTO_AIM_METHOD_NAME[s1.aim_method]}",
+                    cv.putText(img, f"AUTO AIM: {AUTO_AIM_METHOD_LIST[s1.aim_method]}",
                                (0, 96), cv.FONT_HERSHEY_SIMPLEX,
                                0.85, (0, 192, 0), 2)
                     cv.putText(img, f"{s1.aim_target[0]}, {s1.aim_target[1]}",

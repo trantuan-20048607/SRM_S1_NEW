@@ -15,11 +15,7 @@ def start(color: str):
     # 初始化数值
     max_fps, real_fps, cost = 0.0, 0.0, 0.0
 
-    def modify_thresh(x: int):
-        vision.modify_thresh(color, x)
-
-    cv.namedWindow("Control", cv.WINDOW_NORMAL)
-    cv.createTrackbar("THRESH", "Control", BIN_THRESH[color], 255, modify_thresh)
+    # TODO 此处填写测试环境初始化代码
 
     while ret:
         time_start = time.time()
@@ -27,7 +23,7 @@ def start(color: str):
         img = img_.copy()
 
         # 目标位置
-        _ = vision.feed(img, color)
+        tgt = vision.feed(img, color)
 
         # 显示 FPS
         cv.putText(img, "FPS %d/%d" % (int(real_fps), int(max_fps)) if
@@ -40,13 +36,17 @@ def start(color: str):
                    (0, 48), cv.FONT_HERSHEY_SIMPLEX,
                    0.85, (0, 192, 0), 2)
 
-        # 窗口生成
+        # TODO 此处更改窗口标题
         cv.imshow("VISION MODULE TEST", img)
+
+        # TODO 此处填写对每一帧执行的测试代码
 
         cost = time.time() - time_start
         max_fps = 1.0 / max((time.time() - time_start), 1e-4)
-        k = cv.waitKey(max(int(1000.0 / CTR_FPS_LIMIT) - int(1000 * (time.time() - time_start)), 1)) & 0xFF
+        k = cv.waitKey(max(int(1000.0 / CTR_FPS_LIMIT) - int(1000 * (time.time() - time_start)), 0)) & 0xFF
         real_fps = 1.0 / max((time.time() - time_start), 1e-4)
+
+        # TODO 此处可自定义按键操作
         if k == ord('q'):
             break
         elif k == ord('r'):
